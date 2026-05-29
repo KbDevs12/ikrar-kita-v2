@@ -104,6 +104,31 @@ Jangan duplikasi schema. Selalu import dari `src/lib/validators/<domain>.ts`.
   invitation, upload media, checkout).
 - Bungkus error stack trace - jangan dikirim ke client.
 
+### Invitation Templates
+
+Aplikasi mendaftarkan 10 template di
+`src/lib/constants/invitation-templates.ts` dan men-render-nya lewat
+`src/components/invitation/templates/registry.ts`.
+
+Implementasi bespoke saat ini (karakter visual benar-benar berbeda):
+
+- `classic-elegant` — ivory + thin gold rule, asymmetric centred hero
+- `modern-minimalist` — editorial split, oversized first names, hairline timeline
+- `soft-pastel` — peach/lilac watercolour blobs, tilted overlapping cards
+
+Sisanya untuk sementara delegasi ke sibling terdekat di `registry.ts`
+(diberi komentar `TODO bespoke`). Saat menambah template baru:
+
+1. Buat folder file sendiri di `src/components/invitation/templates/<id>.tsx`.
+2. Pastikan layout, tipografi, dan ornamen benar-benar berbeda dari template
+   lain — bukan sekadar ganti palet.
+3. Daftarkan di `registry.ts` menggantikan fallback.
+4. Tambahkan visual regression / snapshot test bila memungkinkan.
+
+Setiap template wajib menerima `InvitationTemplateProps` dan menampilkan:
+opening, hero, quote, detail pasangan, jadwal, countdown, lokasi/peta,
+RSVP, ucapan/doa, gift (opsional), closing.
+
 ### Anti AI-Pattern UI
 
 UI dan copywriting harus terasa dirancang manusia.
