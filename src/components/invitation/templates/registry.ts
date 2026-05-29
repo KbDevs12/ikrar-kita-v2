@@ -17,14 +17,19 @@ const ModernMinimalist = dynamic(() =>
   import("./modern-minimalist").then((m) => m.ModernMinimalist)
 )
 const SoftPastel = dynamic(() => import("./soft-pastel").then((m) => m.SoftPastel))
+const RusticGarden = dynamic(() => import("./rustic-garden").then((m) => m.RusticGarden))
+const LuxuryGold = dynamic(() => import("./luxury-gold").then((m) => m.LuxuryGold))
+const TraditionalIndonesian = dynamic(() =>
+  import("./traditional-indonesian").then((m) => m.TraditionalIndonesian)
+)
 
 const REGISTRY: Record<TemplateId, ComponentType<InvitationTemplateProps>> = {
   "classic-elegant": ClassicElegant,
   "modern-minimalist": ModernMinimalist,
-  "rustic-garden": ClassicElegant, // TODO bespoke - tracked in AGENTS.md
-  "luxury-gold": ClassicElegant, // TODO bespoke
+  "rustic-garden": RusticGarden,
+  "luxury-gold": LuxuryGold,
   "soft-pastel": SoftPastel,
-  "traditional-indonesian": ClassicElegant, // TODO bespoke
+  "traditional-indonesian": TraditionalIndonesian,
   "islamic-elegant": ClassicElegant, // TODO bespoke
   "dark-romance": ClassicElegant, // TODO bespoke
   "floral-watercolor": SoftPastel, // TODO bespoke
