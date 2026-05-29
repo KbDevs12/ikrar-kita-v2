@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 
-const mockSub = vi.hoisted(() => ({ value: null as null | { status: string; planCode: string; invitationLimit: number | null; expiresAt: string } }))
+const mockSub = vi.hoisted(() => ({
+  value: null as null | {
+    status: string
+    planCode: string
+    invitationLimit: number | null
+    expiresAt: string
+  },
+}))
 
 vi.mock("@/server/cache/redis", () => ({
   redis: { del: vi.fn() },
@@ -25,6 +32,7 @@ beforeEach(() => {
   process.env.SESSION_SECRET = "x".repeat(32)
   process.env.INTERNAL_API_KEY = "x".repeat(32)
   process.env.CRON_SECRET = "x".repeat(32)
+  process.env.ADMIN_API_KEY = "x".repeat(32)
   process.env.DATABASE_URL = "postgresql://t:t@localhost/t"
   process.env.REDIS_URL = "redis://localhost"
   process.env.MINIO_ENDPOINT = "http://localhost:9000"
@@ -43,6 +51,7 @@ beforeEach(() => {
   mockSub.value = null
   findFirstMock.mockReset()
   countMock.mockReset()
+  vi.resetModules()
 })
 
 const futureDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 10)

@@ -24,6 +24,7 @@ beforeEach(() => {
   process.env.TRIPAY_RETURN_URL = "http://localhost/x"
   process.env.EMAIL_VERIFICATION_TOKEN_TTL_MINUTES = "60"
   process.env.EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS = "60"
+  process.env.ADMIN_API_KEY = "x".repeat(32)
   vi.resetModules()
 })
 
@@ -61,15 +62,10 @@ const transactionMock = vi.fn(async (ops: unknown) => {
   return undefined
 })
 
-const sendVerificationEmailMock = vi.fn<
-  (
-    user: { id: string; name: string; email: string },
-    rawToken: string
-  ) => Promise<void>
->()
-const sendVerificationSuccessEmailMock = vi.fn<
-  (user: { id: string; name: string; email: string }) => Promise<void>
->()
+const sendVerificationEmailMock =
+  vi.fn<(user: { id: string; name: string; email: string }, rawToken: string) => Promise<void>>()
+const sendVerificationSuccessEmailMock =
+  vi.fn<(user: { id: string; name: string; email: string }) => Promise<void>>()
 
 const redisGetMock = vi.fn()
 const redisTtlMock = vi.fn()
@@ -138,9 +134,7 @@ describe("sendInitialVerification", () => {
     tokenUpdateManyMock.mockResolvedValue({ count: 0 })
     sendVerificationEmailMock.mockResolvedValue(undefined)
 
-    const { sendInitialVerification } = await import(
-      "@/server/email/verification"
-    )
+    const { sendInitialVerification } = await import("@/server/email/verification")
     await sendInitialVerification({ id: "u1", name: "Andi", email: "a@b.com" })
 
     // The transaction wrapper got called with an array of two ops (mark-old +
@@ -163,9 +157,7 @@ describe("sendInitialVerification", () => {
   it("invalidates pending tokens before issuing a new one", async () => {
     tokenUpdateManyMock.mockResolvedValue({ count: 2 })
     tokenCreateMock.mockResolvedValue({ id: "t2" })
-    const { sendInitialVerification } = await import(
-      "@/server/email/verification"
-    )
+    const { sendInitialVerification } = await import("@/server/email/verification")
     await sendInitialVerification({ id: "u1", name: "A", email: "a@b.com" })
     expect(tokenUpdateManyMock).toHaveBeenCalledWith({
       where: { userId: "u1", usedAt: null },
@@ -177,9 +169,7 @@ describe("sendInitialVerification", () => {
     process.env.EMAIL_VERIFICATION_TOKEN_TTL_MINUTES = "30"
     tokenCreateMock.mockResolvedValue({ id: "t3" })
     tokenUpdateManyMock.mockResolvedValue({ count: 0 })
-    const { sendInitialVerification } = await import(
-      "@/server/email/verification"
-    )
+    const { sendInitialVerification } = await import("@/server/email/verification")
     await sendInitialVerification({ id: "u1", name: "A", email: "a@b.com" })
     const createArgs = tokenCreateMock.mock.calls[0]?.[0]
     if (!createArgs) throw new Error("expected tokenCreate to have been called")

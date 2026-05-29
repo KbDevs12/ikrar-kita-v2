@@ -21,6 +21,7 @@ const ENV = {
   SESSION_SECRET: "x".repeat(32),
   INTERNAL_API_KEY: "x".repeat(32),
   CRON_SECRET: "x".repeat(32),
+  ADMIN_API_KEY: "x".repeat(32),
 }
 
 beforeEach(() => {
