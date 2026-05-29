@@ -7,8 +7,10 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-// Default test env - tests should override per-suite when needed
-process.env.NODE_ENV = "test"
+// Default test env - tests should override per-suite when needed.
+// process.env.NODE_ENV is typed readonly in Node 20+ types, so cast through
+// a permissive shape to assign without disabling strictness elsewhere.
+;(process.env as Record<string, string | undefined>).NODE_ENV = "test"
 process.env.SESSION_SECRET = "test-session-secret-change-me-32chars"
 process.env.INTERNAL_API_KEY = "test-internal-api-key"
 process.env.CRON_SECRET = "test-cron-secret"
