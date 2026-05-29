@@ -1,5 +1,5 @@
 import "server-only"
-import { Prisma } from "@prisma/client"
+import type { Prisma } from "@prisma/client"
 import { adminManualApproveSchema } from "@/lib/validators/admin"
 import { requireAdmin } from "@/server/auth/guards"
 import { prisma } from "@/server/db/prisma"
