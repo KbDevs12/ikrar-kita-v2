@@ -14,10 +14,13 @@ describe("slugSchema", () => {
     expect(slugSchema.safeParse("andi-sinta").success).toBe(true)
     expect(slugSchema.safeParse("rizky-nadia-2026").success).toBe(true)
   })
-  it("rejects uppercase, spaces, special chars", () => {
-    for (const s of ["Andi-Sinta", "andi sinta", "andi_sinta", "andi.sinta", "-andi", "andi-"]) {
+  it("rejects spaces, special chars, and invalid edge cases", () => {
+    for (const s of ["andi sinta", "andi_sinta", "andi.sinta", "-andi", "andi-"]) {
       expect(slugSchema.safeParse(s).success).toBe(false)
     }
+  })
+  it("auto-lowercases uppercase input", () => {
+    expect(slugSchema.safeParse("Andi-Sinta").success).toBe(true)
   })
   it("rejects too short or too long", () => {
     expect(slugSchema.safeParse("ab").success).toBe(false)
@@ -42,7 +45,9 @@ describe("sanitiseRecipient (?to= query)", () => {
     expect(sanitiseRecipient("")).toBe("Tamu Undangan")
   })
   it("strips angle brackets to neutralise XSS payloads", () => {
-    expect(sanitiseRecipient("<script>alert(1)</script>Bapak Budi")).toBe("scriptalert(1)/scriptBapak Budi")
+    expect(sanitiseRecipient("<script>alert(1)</script>Bapak Budi")).toBe(
+      "scriptalert(1)/scriptBapak Budi"
+    )
   })
   it("normalises whitespace", () => {
     expect(sanitiseRecipient("  Keluarga   Besar  Pak Agus  ")).toBe("Keluarga Besar Pak Agus")

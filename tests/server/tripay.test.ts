@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { describe, it, expect, beforeEach, vi } from "vitest"
 import { createHmac } from "node:crypto"
 
 // Set required env BEFORE importing the module - tripay.ts reads at module init
@@ -19,6 +19,11 @@ beforeEach(() => {
   process.env.SMTP_PASSWORD = "secret"
   process.env.SMTP_FROM_EMAIL = "noreply@example.com"
   process.env.ADMIN_NOTIFICATION_EMAIL = "admin@example.com"
+  process.env.SESSION_SECRET = "x".repeat(32)
+  process.env.INTERNAL_API_KEY = "x".repeat(32)
+  process.env.CRON_SECRET = "x".repeat(32)
+  process.env.ADMIN_API_KEY = "x".repeat(32)
+  vi.resetModules()
 })
 
 describe("tripay signatures", () => {

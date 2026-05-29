@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { describe, it, expect, beforeEach, vi } from "vitest"
 
 beforeEach(() => {
+  process.env.ADMIN_API_KEY = "x".repeat(32)
   process.env.INTERNAL_API_KEY = "this-is-the-real-internal-api-key-32b"
   process.env.CRON_SECRET = "this-is-the-real-cron-secret-32b-long"
   process.env.TRIPAY_MODE = "sandbox"
@@ -20,6 +21,7 @@ beforeEach(() => {
   process.env.SMTP_FROM_EMAIL = "x@x.com"
   process.env.ADMIN_NOTIFICATION_EMAIL = "x@x.com"
   process.env.SESSION_SECRET = "this-is-a-32-character-session-secret"
+  vi.resetModules() // Clear module cache to ensure environment variables are re-read
 })
 
 function reqWith(headers: Record<string, string>): Request {
@@ -39,7 +41,9 @@ describe("verifyInternalApiKey", () => {
   it("accepts a valid X-Internal-Api-Key header", async () => {
     const { verifyInternalApiKey } = await import("@/server/security/api-key")
     expect(
-      verifyInternalApiKey(reqWith({ "X-Internal-Api-Key": "this-is-the-real-internal-api-key-32b" }))
+      verifyInternalApiKey(
+        reqWith({ "X-Internal-Api-Key": "this-is-the-real-internal-api-key-32b" })
+      )
     ).toBe(true)
   })
 
@@ -63,9 +67,7 @@ describe("verifyInternalApiKey", () => {
   })
 
   it("requireInternalApiKey throws UnauthorizedError on miss", async () => {
-    const { requireInternalApiKey, UnauthorizedError } = await import(
-      "@/server/security/api-key"
-    )
+    const { requireInternalApiKey, UnauthorizedError } = await import("@/server/security/api-key")
     expect(() => requireInternalApiKey(reqWith({}))).toThrow(UnauthorizedError)
   })
 })
