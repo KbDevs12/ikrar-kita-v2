@@ -15,6 +15,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -27,6 +30,8 @@ interface InvitationContent {
   openingQuote?: string
   giftEnabled?: boolean
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -288,6 +293,45 @@ export function CinematicStory({ invitation, recipient }: InvitationTemplateProp
               </li>
             ))}
           </ul>
+        </Chapter>
+      ) : null}
+
+      {/* Chapter — RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <Chapter
+          number={++chapter}
+          kicker="Konfirmasi"
+          title="RSVP"
+          accent={accent}
+        >
+          <p className="mb-6 max-w-md text-sm text-white/75">
+            Kabarkan kehadiran Anda agar kami bisa menyiapkan satu kursi
+            khusus.
+          </p>
+          <div className="border border-white/10 bg-white/[0.03] p-6">
+            <PublicRsvpForm invitationId={invitation.id} tone="dark" accent={accent} />
+          </div>
+        </Chapter>
+      ) : null}
+
+      {/* Chapter — Ucapan */}
+      {c.guestMessageEnabled !== false ? (
+        <Chapter
+          number={++chapter}
+          kicker="Ucapan"
+          title="Pesan tamu"
+          accent={accent}
+        >
+          <div className="border border-white/10 bg-white/[0.03] p-6">
+            <PublicGuestMessageForm
+              invitationId={invitation.id}
+              tone="dark"
+              accent={accent}
+            />
+          </div>
+          <div className="mt-8">
+            <GuestMessagesList invitationId={invitation.id} tone="dark" />
+          </div>
         </Chapter>
       ) : null}
 

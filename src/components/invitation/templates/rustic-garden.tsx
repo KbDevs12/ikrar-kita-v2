@@ -15,6 +15,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -26,6 +29,8 @@ interface InvitationContent {
   openingQuote?: string
   giftEnabled?: boolean
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -226,6 +231,33 @@ export function RusticGarden({ invitation, recipient }: InvitationTemplateProps)
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {/* RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <RusticHeading kicker="konfirmasi kehadiran" title="RSVP" accent={accent} />
+          <div className="mt-8 rotate-[-0.4deg] rounded-sm border border-sage-700/30 bg-[#fbf6e9] p-5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)]">
+            <PublicRsvpForm invitationId={invitation.id} tone="light" accent={accent} />
+          </div>
+        </section>
+      ) : null}
+
+      {/* Ucapan */}
+      {c.guestMessageEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <RusticHeading kicker="ucapan &amp; doa" title="Pesan tamu" accent={accent} />
+          <div className="mt-8 rotate-[0.4deg] rounded-sm border border-sage-700/30 bg-[#fbf6e9] p-5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)]">
+            <PublicGuestMessageForm
+              invitationId={invitation.id}
+              tone="light"
+              accent={accent}
+            />
+          </div>
+          <div className="mt-8">
+            <GuestMessagesList invitationId={invitation.id} tone="light" />
+          </div>
         </section>
       ) : null}
 
