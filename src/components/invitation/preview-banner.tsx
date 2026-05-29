@@ -118,7 +118,7 @@ export function PreviewBanner({
             Edit
           </Link>
           <Link
-            href={`/dashboard/invitations`}
+            href="/dashboard/invitations"
             className="rounded-md bg-primary px-2.5 py-1 text-primary-foreground hover:opacity-90"
           >
             Keluar

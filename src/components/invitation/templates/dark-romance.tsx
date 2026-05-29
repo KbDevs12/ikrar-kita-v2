@@ -165,7 +165,7 @@ export function DarkRomance({ invitation, recipient }: InvitationTemplateProps) 
             <h2 className="mt-3 font-display text-4xl">Susunan Acara</h2>
           </header>
           <ol className="relative mt-12 space-y-10">
-            {c.schedule.map((item, i) => (
+            {c.schedule.map((item, i, arr) => (
               <li key={i} className="relative pl-8 sm:mx-auto sm:max-w-md">
                 <span
                   className="absolute left-0 top-2 h-2 w-2 rounded-full"
@@ -175,7 +175,7 @@ export function DarkRomance({ invitation, recipient }: InvitationTemplateProps) 
                 <span
                   className="absolute left-[3px] top-4 h-full w-px"
                   style={{ background: `${accent}33` }}
-                  aria-hidden={i === c.schedule!.length - 1}
+                  aria-hidden={i === arr.length - 1}
                 />
                 <p
                   className="text-[10px] uppercase tracking-[0.4em]"
