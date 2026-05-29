@@ -27,8 +27,9 @@ beforeEach(() => {
 
 const findUniqueMock = vi.fn()
 const updateMock = vi.fn()
-const auditCreateMock = vi.fn(async () => ({}))
-const invalidatePublicInvitationMock = vi.fn(async () => undefined)
+type AuditCreateArg = { data: { action: string; metadata?: unknown } }
+const auditCreateMock = vi.fn<(arg: AuditCreateArg) => Promise<unknown>>()
+const invalidatePublicInvitationMock = vi.fn(async (_slug: string) => undefined)
 const getActiveSubscriptionViewMock = vi.fn()
 const checkPublishLimitMock = vi.fn()
 

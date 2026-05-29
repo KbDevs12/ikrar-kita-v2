@@ -28,12 +28,30 @@ beforeEach(() => {
 })
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
-const tokenCreateMock = vi.fn()
-const tokenUpdateMock = vi.fn()
-const tokenUpdateManyMock = vi.fn()
-const tokenFindUniqueMock = vi.fn()
-const userFindUniqueMock = vi.fn()
-const userUpdateMock = vi.fn()
+type TokenCreateArg = {
+  data: { userId: string; tokenHash: string; expiresAt: Date }
+}
+type TokenUpdateArg = { where: { id: string }; data: { usedAt: Date } }
+type TokenUpdateManyArg = {
+  where: { userId: string; usedAt: null }
+  data: { usedAt: Date }
+}
+type TokenFindUniqueArg = {
+  where: { tokenHash: string }
+  include?: { user: boolean }
+}
+type UserFindUniqueArg = { where: { email: string } }
+type UserUpdateArg = {
+  where: { id: string }
+  data: { emailVerifiedAt: Date; emailVerificationStatus: string }
+}
+
+const tokenCreateMock = vi.fn<(arg: TokenCreateArg) => Promise<unknown>>()
+const tokenUpdateMock = vi.fn<(arg: TokenUpdateArg) => Promise<unknown>>()
+const tokenUpdateManyMock = vi.fn<(arg: TokenUpdateManyArg) => Promise<unknown>>()
+const tokenFindUniqueMock = vi.fn<(arg: TokenFindUniqueArg) => Promise<unknown>>()
+const userFindUniqueMock = vi.fn<(arg: UserFindUniqueArg) => Promise<unknown>>()
+const userUpdateMock = vi.fn<(arg: UserUpdateArg) => Promise<unknown>>()
 
 const transactionMock = vi.fn(async (ops: unknown) => {
   // The verification module passes either an array of pending Prisma ops or
@@ -43,8 +61,15 @@ const transactionMock = vi.fn(async (ops: unknown) => {
   return undefined
 })
 
-const sendVerificationEmailMock = vi.fn(async () => undefined)
-const sendVerificationSuccessEmailMock = vi.fn(async () => undefined)
+const sendVerificationEmailMock = vi.fn<
+  (
+    user: { id: string; name: string; email: string },
+    rawToken: string
+  ) => Promise<void>
+>()
+const sendVerificationSuccessEmailMock = vi.fn<
+  (user: { id: string; name: string; email: string }) => Promise<void>
+>()
 
 const redisGetMock = vi.fn()
 const redisTtlMock = vi.fn()
@@ -122,11 +147,14 @@ describe("sendInitialVerification", () => {
     // create-new). We grab the create call directly from its mock.
     expect(tokenCreateMock).toHaveBeenCalledTimes(1)
     const createArgs = tokenCreateMock.mock.calls[0]?.[0]
+    if (!createArgs) throw new Error("expected tokenCreate to have been called")
     expect(createArgs.data.userId).toBe("u1")
     expect(createArgs.data.tokenHash).toMatch(/^[0-9a-f]{64}$/)
     // The raw token must not appear in the persisted row
     const tokenSentToEmail = sendVerificationEmailMock.mock.calls[0]?.[1]
-    expect(typeof tokenSentToEmail).toBe("string")
+    if (typeof tokenSentToEmail !== "string") {
+      throw new Error("expected sendVerificationEmail to have received a token string")
+    }
     expect(createArgs.data.tokenHash).not.toBe(tokenSentToEmail)
     // And the hash must be SHA-256 of the raw token
     expect(createArgs.data.tokenHash).toBe(sha256(tokenSentToEmail))
@@ -154,7 +182,8 @@ describe("sendInitialVerification", () => {
     )
     await sendInitialVerification({ id: "u1", name: "A", email: "a@b.com" })
     const createArgs = tokenCreateMock.mock.calls[0]?.[0]
-    const expiresAt = createArgs.data.expiresAt as Date
+    if (!createArgs) throw new Error("expected tokenCreate to have been called")
+    const expiresAt = createArgs.data.expiresAt
     const drift = expiresAt.getTime() - Date.now() - 30 * 60 * 1000
     expect(Math.abs(drift)).toBeLessThan(1000)
   })
