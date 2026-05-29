@@ -62,13 +62,21 @@ export default async function EditInvitationPage({ params }: PageProps) {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            href={`/${invitation.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`/dashboard/invitations/${invitation.id}/preview`}
             className="rounded-md border border-border px-4 py-2 text-sm hover:bg-accent"
           >
             Pratinjau
           </Link>
+          {invitation.status === "PUBLISHED" ? (
+            <Link
+              href={`/${invitation.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border border-border px-4 py-2 text-sm hover:bg-accent"
+            >
+              Buka URL publik
+            </Link>
+          ) : null}
           {invitation.status !== "PUBLISHED" ? <PublishButton invitationId={invitation.id} /> : null}
         </div>
       </header>

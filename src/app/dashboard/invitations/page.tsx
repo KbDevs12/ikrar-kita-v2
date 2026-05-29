@@ -87,9 +87,7 @@ export default async function InvitationsPage() {
                       Edit
                     </Link>
                     <Link
-                      href={`/${i.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={`/dashboard/invitations/${i.id}/preview`}
                       className="text-muted-foreground hover:text-foreground"
                     >
                       Pratinjau
