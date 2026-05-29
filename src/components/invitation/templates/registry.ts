@@ -22,6 +22,10 @@ const LuxuryGold = dynamic(() => import("./luxury-gold").then((m) => m.LuxuryGol
 const TraditionalIndonesian = dynamic(() =>
   import("./traditional-indonesian").then((m) => m.TraditionalIndonesian)
 )
+const IslamicElegant = dynamic(() =>
+  import("./islamic-elegant").then((m) => m.IslamicElegant)
+)
+const DarkRomance = dynamic(() => import("./dark-romance").then((m) => m.DarkRomance))
 
 const REGISTRY: Record<TemplateId, ComponentType<InvitationTemplateProps>> = {
   "classic-elegant": ClassicElegant,
@@ -30,8 +34,8 @@ const REGISTRY: Record<TemplateId, ComponentType<InvitationTemplateProps>> = {
   "luxury-gold": LuxuryGold,
   "soft-pastel": SoftPastel,
   "traditional-indonesian": TraditionalIndonesian,
-  "islamic-elegant": ClassicElegant, // TODO bespoke
-  "dark-romance": ClassicElegant, // TODO bespoke
+  "islamic-elegant": IslamicElegant,
+  "dark-romance": DarkRomance,
   "floral-watercolor": SoftPastel, // TODO bespoke
   "cinematic-story": ModernMinimalist, // TODO bespoke
 }
