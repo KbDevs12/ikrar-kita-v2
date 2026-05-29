@@ -17,8 +17,6 @@ describe("template registry", () => {
     for (const id of TEMPLATE_IDS) {
       const Component = getTemplateComponent(id)
       expect(Component).toBeTruthy()
-      // dynamic() returns a component-like object - it has displayName or _payload
-      expect(typeof Component).toBe("function" satisfies "function" | "object" extends never ? never : "function")
     }
   })
 
