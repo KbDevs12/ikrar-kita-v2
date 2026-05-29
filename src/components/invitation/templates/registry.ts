@@ -26,6 +26,12 @@ const IslamicElegant = dynamic(() =>
   import("./islamic-elegant").then((m) => m.IslamicElegant)
 )
 const DarkRomance = dynamic(() => import("./dark-romance").then((m) => m.DarkRomance))
+const FloralWatercolor = dynamic(() =>
+  import("./floral-watercolor").then((m) => m.FloralWatercolor)
+)
+const CinematicStory = dynamic(() =>
+  import("./cinematic-story").then((m) => m.CinematicStory)
+)
 
 const REGISTRY: Record<TemplateId, ComponentType<InvitationTemplateProps>> = {
   "classic-elegant": ClassicElegant,
@@ -36,8 +42,8 @@ const REGISTRY: Record<TemplateId, ComponentType<InvitationTemplateProps>> = {
   "traditional-indonesian": TraditionalIndonesian,
   "islamic-elegant": IslamicElegant,
   "dark-romance": DarkRomance,
-  "floral-watercolor": SoftPastel, // TODO bespoke
-  "cinematic-story": ModernMinimalist, // TODO bespoke
+  "floral-watercolor": FloralWatercolor,
+  "cinematic-story": CinematicStory,
 }
 
 export function getTemplateComponent(
