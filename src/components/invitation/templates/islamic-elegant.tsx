@@ -247,7 +247,7 @@ export function IslamicElegant({ invitation, recipient }: InvitationTemplateProp
             </h2>
           </header>
           <ul className="mt-12 space-y-9">
-            {c.schedule.map((item, i) => (
+            {c.schedule.map((item, i, arr) => (
               <li
                 key={i}
                 className="text-center"
@@ -269,7 +269,7 @@ export function IslamicElegant({ invitation, recipient }: InvitationTemplateProp
                     {item.notes}
                   </p>
                 ) : null}
-                {i < c.schedule!.length - 1 ? (
+                {i < arr.length - 1 ? (
                   <EightPointStar
                     className="mx-auto mt-9 h-4 w-4 opacity-50"
                     style={{ color: accent }}

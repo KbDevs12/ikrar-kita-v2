@@ -10,7 +10,7 @@
  *      callback cannot create a second subscription extension.
  */
 import "server-only"
-import { Prisma } from "@prisma/client"
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/server/db/prisma"
 import { activateOrExtendSubscription, invalidateSubscriptionCache } from "@/server/subscription/subscription-service"
 import { invalidatePublicInvitationsForUser } from "@/server/invitation/cache"
@@ -56,9 +56,12 @@ export async function handleTripayCallback(
   }
 
   // Process inside a transaction so duplicate callbacks cannot race.
+  // Pin the payload to a const so subsequent narrowing avoids non-null
+  // assertions (already null-checked above).
+  const payload = parsed.payload
   const outcome = await prisma.$transaction(async (tx) => {
     const invoice = await tx.invoice.findUnique({
-      where: { merchantRef: parsed.payload!.merchant_ref },
+      where: { merchantRef: payload.merchant_ref },
       include: { plan: true, user: true },
     })
     if (!invoice) return { kind: "UNKNOWN_INVOICE" as const }
@@ -74,13 +77,13 @@ export async function handleTripayCallback(
       // Still update the callback payload for audit, but don't re-activate.
       await tx.invoice.update({
         where: { id: invoice.id },
-        data: { tripayCallbackPayload: parsed.payload as unknown as Prisma.JsonObject },
+        data: { tripayCallbackPayload: payload as unknown as Prisma.JsonObject },
       })
       return { kind: "DUPLICATE" as const, invoice }
     }
 
     const now = new Date()
-    const paidAt = parsed.payload!.paid_at ? new Date(parsed.payload!.paid_at * 1000) : now
+    const paidAt = payload.paid_at ? new Date(payload.paid_at * 1000) : now
 
     if (newStatus === "PAID") {
       const updated = await tx.invoice.update({
@@ -89,7 +92,7 @@ export async function handleTripayCallback(
           status: "PAID",
           paidAt,
           processedAt: now,
-          tripayCallbackPayload: parsed.payload as unknown as Prisma.JsonObject,
+          tripayCallbackPayload: payload as unknown as Prisma.JsonObject,
         },
       })
       await activateOrExtendSubscription(tx, {
@@ -119,7 +122,7 @@ export async function handleTripayCallback(
       data: {
         status: newStatus,
         processedAt: now,
-        tripayCallbackPayload: parsed.payload as unknown as Prisma.JsonObject,
+        tripayCallbackPayload: payload as unknown as Prisma.JsonObject,
       },
     })
     return { kind: newStatus as "EXPIRED" | "FAILED" | "REFUND", invoice: updated, plan: invoice.plan, user: invoice.user }

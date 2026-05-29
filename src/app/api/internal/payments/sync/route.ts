@@ -1,6 +1,6 @@
 import "server-only"
 import { z } from "zod"
-import { Prisma } from "@prisma/client"
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/server/db/prisma"
 import { getTransactionDetail } from "@/server/payment/tripay"
 import {
@@ -58,8 +58,15 @@ export async function POST(req: Request): Promise<Response> {
     let updated = 0
     let failed = 0
     for (const invoice of pending) {
+      // Re-narrow inside the loop without a non-null assertion - rows here
+      // were filtered with `tripayReference: { not: null }` so this is just
+      // a defensive guard in case the row was modified by another worker.
+      const reference = invoice.tripayReference
+      if (!reference) {
+        continue
+      }
       try {
-        const tripay = await getTransactionDetail(invoice.tripayReference!)
+        const tripay = await getTransactionDetail(reference)
         const newStatus =
           TRIPAY_TO_INVOICE_STATUS[
             tripay.status.toUpperCase() as keyof typeof TRIPAY_TO_INVOICE_STATUS
