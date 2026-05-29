@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation"
 import { resolvePublicInvitation } from "@/server/invitation/invitation-service"
 import { sanitiseRecipient } from "@/lib/validators/invitation"
 import { getTemplateComponent } from "@/components/invitation/templates/registry"

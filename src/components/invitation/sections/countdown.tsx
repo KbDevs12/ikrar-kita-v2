@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { computeCountdown } from "./section-helpers"
 
 interface CountdownProps {
@@ -11,7 +11,9 @@ interface CountdownProps {
 const labels = ["Hari", "Jam", "Menit", "Detik"] as const
 
 export function Countdown({ target, variant = "classic" }: CountdownProps) {
-  const targetDate = new Date(target)
+  // Memoise the Date so the useEffect dependency is stable across renders -
+  // re-running the interval setup every render would cause skipped ticks.
+  const targetDate = useMemo(() => new Date(target), [target])
   const [state, setState] = useState(() => computeCountdown(targetDate))
 
   useEffect(() => {

@@ -43,7 +43,17 @@ export function detectImageMime(buf: Buffer): AllowedImageMime | null {
 export function detectAudioMime(buf: Buffer): AllowedAudioMime | null {
   // ID3 (MP3 with metadata) or 0xFF 0xE/F (MPEG audio frame sync)
   if (asciiAt(buf, 0, 3) === "ID3") return "audio/mpeg"
-  if (buf.length >= 2 && buf[0] === 0xff && (buf[1] & 0xe0) === 0xe0) return "audio/mpeg"
+  // Pull both bytes once after the length check so we don't re-index buf in
+  // a way that confuses noUncheckedIndexedAccess.
+  const b0 = buf[0]
+  const b1 = buf[1]
+  if (
+    buf.length >= 2 &&
+    b0 === 0xff &&
+    b1 !== undefined &&
+    (b1 & 0xe0) === 0xe0
+  )
+    return "audio/mpeg"
   // RIFF + WAVE
   if (asciiAt(buf, 0, 4) === "RIFF" && asciiAt(buf, 8, 4) === "WAVE") return "audio/wav"
   // OGG

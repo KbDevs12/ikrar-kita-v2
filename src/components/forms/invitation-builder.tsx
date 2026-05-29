@@ -116,7 +116,7 @@ export function InvitationBuilder({ initialData }: BuilderProps) {
         setServerError(parsed.error.issues[0]?.message ?? "Periksa kembali isian Anda.")
         return
       }
-      const url = isEditing ? `/api/invitations/${initialData!.id}` : "/api/invitations"
+      const url = isEditing && initialData?.id ? `/api/invitations/${initialData.id}` : "/api/invitations"
       const method = isEditing ? "PATCH" : "POST"
       const res = await fetch(url, {
         method,

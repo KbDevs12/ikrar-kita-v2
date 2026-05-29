@@ -14,11 +14,9 @@ import {
   invitationCreateSchema,
   invitationUpdateSchema,
   type InvitationCreateInput,
-  type InvitationUpdateInput,
 } from "@/lib/validators/invitation"
 import {
   invalidatePublicInvitation,
-  invalidatePublicInvitationsForUser,
   toPublicView,
   setCachedPublicInvitation,
   getCachedPublicInvitation,
@@ -231,6 +229,12 @@ export async function publishInvitation(
   ensureOwner(existing, user.id)
   if (existing.status === "PUBLISHED") {
     throw new InvitationError("ALREADY_PUBLISHED", "Undangan sudah dipublish")
+  }
+  if (existing.status === "ARCHIVED") {
+    throw new InvitationError(
+      "ARCHIVED",
+      "Undangan sudah diarsipkan. Pulihkan dari arsip terlebih dahulu sebelum dipublish."
+    )
   }
 
   const updated = await prisma.invitation.update({

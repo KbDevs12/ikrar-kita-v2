@@ -7,6 +7,11 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // server-only would throw on import in pure Node; alias to an inert
+      // stub so server modules can be unit-tested.
+      "server-only": fileURLToPath(
+        new URL("./tests/stubs/server-only.ts", import.meta.url)
+      ),
     },
   },
   test: {

@@ -14,8 +14,8 @@ interface GuestMessageFormProps {
 }
 
 type ApiResponse =
-  | { ok: true; data: unknown }
-  | { ok: false; error: { code: string; message: string } }
+  | { ok: true; data: unknown; error?: undefined }
+  | { ok: false; error: { code: string; message: string }; data?: undefined }
 
 export function PublicGuestMessageForm({
   invitationId,
