@@ -230,6 +230,12 @@ export async function publishInvitation(
   if (existing.status === "PUBLISHED") {
     throw new InvitationError("ALREADY_PUBLISHED", "Undangan sudah dipublish")
   }
+  if (existing.status === "ARCHIVED") {
+    throw new InvitationError(
+      "ARCHIVED",
+      "Undangan sudah diarsipkan. Pulihkan dari arsip terlebih dahulu sebelum dipublish."
+    )
+  }
 
   const updated = await prisma.invitation.update({
     where: { id: existing.id },
