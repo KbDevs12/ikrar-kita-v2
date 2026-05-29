@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: wedding_saas_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/wedding_saas_test
+      REDIS_URL: redis://localhost:6379
+      SESSION_SECRET: ci-session-secret-aaaaaaaaaaaaaaaaaaaaaaaaaaa
+      INTERNAL_API_KEY: ci-internal-key-aaaaaaaaaaaaaaaaaaaaaa
+      CRON_SECRET: ci-cron-secret-aaaaaaaaaaaaaaaaaaaaaa
+      TRIPAY_MODE: sandbox
+      TRIPAY_API_KEY: ci
+      TRIPAY_PRIVATE_KEY: ci
+      TRIPAY_MERCHANT_CODE: T0000
+      TRIPAY_CALLBACK_URL: http://localhost:3000/api/webhooks/tripay
+      TRIPAY_RETURN_URL: http://localhost:3000/dashboard/billing
+      MINIO_ENDPOINT: http://localhost:9000
+      MINIO_PUBLIC_URL: http://localhost:9000
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio12345
+      MINIO_BUCKET: ci-bucket
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "587"
+      SMTP_SECURE: "false"
+      SMTP_USER: ci@example.com
+      SMTP_PASSWORD: ci
+      SMTP_FROM_EMAIL: noreply@example.com
+      ADMIN_NOTIFICATION_EMAIL: admin@example.com
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Apply migrations (test DB)
+        run: pnpm prisma migrate deploy
+        continue-on-error: true # tolerate empty migrations folder during early development
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: SKIP_ENV_VALIDATION=1 pnpm build
