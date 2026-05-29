@@ -12,6 +12,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -23,6 +26,8 @@ interface InvitationContent {
   openingQuote?: string
   giftEnabled?: boolean
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -308,6 +313,55 @@ export function FloralWatercolor({ invitation, recipient }: InvitationTemplatePr
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {/* RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <header className="text-center">
+            <WreathBullet className="mx-auto h-8 w-8" />
+            <h2
+              className="mt-3 font-display text-3xl italic"
+              style={{ color: accent }}
+            >
+              Konfirmasi Kehadiran
+            </h2>
+          </header>
+          <div
+            className="mt-8 rounded-3xl border bg-[#fdf6f1] p-6"
+            style={{ borderColor: `${accent}33` }}
+          >
+            <PublicRsvpForm invitationId={invitation.id} tone="light" accent={accent} />
+          </div>
+        </section>
+      ) : null}
+
+      {/* Ucapan */}
+      {c.guestMessageEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <header className="text-center">
+            <WreathBullet className="mx-auto h-8 w-8" />
+            <h2
+              className="mt-3 font-display text-3xl italic"
+              style={{ color: accent }}
+            >
+              Ucapan &amp; Doa
+            </h2>
+          </header>
+          <div
+            className="mt-8 rounded-3xl border bg-[#fdf6f1] p-6"
+            style={{ borderColor: `${accent}33` }}
+          >
+            <PublicGuestMessageForm
+              invitationId={invitation.id}
+              tone="light"
+              accent={accent}
+            />
+          </div>
+          <div className="mt-8">
+            <GuestMessagesList invitationId={invitation.id} tone="light" />
+          </div>
         </section>
       ) : null}
 

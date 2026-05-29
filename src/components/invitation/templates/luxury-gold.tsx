@@ -14,6 +14,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -25,6 +28,8 @@ interface InvitationContent {
   openingQuote?: string
   giftEnabled?: boolean
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -301,6 +306,55 @@ export function LuxuryGold({ invitation, recipient }: InvitationTemplateProps) {
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {/* RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <header className="text-center">
+            <p
+              className="text-[10px] uppercase tracking-[0.4em]"
+              style={{ color: accent }}
+            >
+              Confirmation
+            </p>
+            <h2 className="mt-3 font-display text-3xl">RSVP</h2>
+          </header>
+          <div className="mt-8">
+            <GiltRule />
+          </div>
+          <div className="mt-8 bg-[#171411] p-6">
+            <PublicRsvpForm invitationId={invitation.id} tone="dark" accent={accent} />
+          </div>
+        </section>
+      ) : null}
+
+      {/* Ucapan */}
+      {c.guestMessageEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <header className="text-center">
+            <p
+              className="text-[10px] uppercase tracking-[0.4em]"
+              style={{ color: accent }}
+            >
+              Toast &amp; Wishes
+            </p>
+            <h2 className="mt-3 font-display text-3xl">Ucapan tamu</h2>
+          </header>
+          <div className="mt-8">
+            <GiltRule />
+          </div>
+          <div className="mt-8 bg-[#171411] p-6">
+            <PublicGuestMessageForm
+              invitationId={invitation.id}
+              tone="dark"
+              accent={accent}
+            />
+          </div>
+          <div className="mt-8 text-[#e9e0c9]/85">
+            <GuestMessagesList invitationId={invitation.id} tone="dark" />
+          </div>
         </section>
       ) : null}
 

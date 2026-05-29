@@ -13,6 +13,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -24,6 +27,8 @@ interface InvitationContent {
   openingQuote?: string
   giftEnabled?: boolean
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -249,6 +254,51 @@ export function TraditionalIndonesian({
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {/* RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <h2
+            className="text-center font-display text-3xl"
+            style={{ color: accent }}
+          >
+            Konfirmasi Kehadiran
+          </h2>
+          <SongketDivider accent={accent} />
+          <div
+            className="mt-8 rounded-lg border bg-[#fbf3df]/70 p-6"
+            style={{ borderColor: `${accent}33` }}
+          >
+            <PublicRsvpForm invitationId={invitation.id} tone="light" accent={accent} />
+          </div>
+        </section>
+      ) : null}
+
+      {/* Ucapan */}
+      {c.guestMessageEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <h2
+            className="text-center font-display text-3xl"
+            style={{ color: accent }}
+          >
+            Ucapan &amp; Doa
+          </h2>
+          <SongketDivider accent={accent} />
+          <div
+            className="mt-8 rounded-lg border bg-[#fbf3df]/70 p-6"
+            style={{ borderColor: `${accent}33` }}
+          >
+            <PublicGuestMessageForm
+              invitationId={invitation.id}
+              tone="light"
+              accent={accent}
+            />
+          </div>
+          <div className="mt-8">
+            <GuestMessagesList invitationId={invitation.id} tone="light" />
+          </div>
         </section>
       ) : null}
 

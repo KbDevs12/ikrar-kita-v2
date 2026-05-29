@@ -12,6 +12,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -23,6 +26,8 @@ interface InvitationContent {
   openingQuote?: string
   giftEnabled?: boolean
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -182,6 +187,36 @@ export function SoftPastel({ invitation, recipient }: InvitationTemplateProps) {
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {/* RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <SoftHeading kicker="Konfirmasi Kehadiran" title="RSVP" />
+          <p className="mt-3 text-center text-sm text-rose-700/80">
+            Mohon konfirmasi agar kami dapat menyiapkan tempat dengan baik.
+          </p>
+          <div className="mt-8 rounded-2xl bg-white/70 p-5 shadow-sm ring-1 ring-rose-200/60 backdrop-blur sm:p-6">
+            <PublicRsvpForm invitationId={invitation.id} tone="light" accent={accent} />
+          </div>
+        </section>
+      ) : null}
+
+      {/* Ucapan */}
+      {c.guestMessageEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <SoftHeading kicker="Ucapan &amp; Doa" title="Pesan untuk pasangan" />
+          <div className="mt-8 rounded-2xl bg-white/70 p-5 shadow-sm ring-1 ring-rose-200/60 backdrop-blur sm:p-6">
+            <PublicGuestMessageForm
+              invitationId={invitation.id}
+              tone="light"
+              accent={accent}
+            />
+          </div>
+          <div className="mt-8">
+            <GuestMessagesList invitationId={invitation.id} tone="light" />
+          </div>
         </section>
       ) : null}
 

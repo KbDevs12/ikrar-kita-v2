@@ -13,6 +13,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -26,6 +29,8 @@ interface InvitationContent {
   galleryUrls?: string[]
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
   giftEnabled?: boolean
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -189,6 +194,49 @@ export function ModernMinimalist({ invitation, recipient }: InvitationTemplatePr
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {/* RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <section className="mx-auto max-w-4xl px-6 py-20">
+          <div className="grid gap-10 lg:grid-cols-[200px_1fr]">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.4em] text-[#2f3437]/60">
+                konfirmasi
+              </p>
+              <h2 className="mt-2 font-display text-4xl">RSVP</h2>
+            </div>
+            <div>
+              <p className="mb-6 max-w-md text-sm text-[#2f3437]/70">
+                Mohon kabarkan kehadiran Anda agar kami dapat menyiapkan tempat
+                dengan baik.
+              </p>
+              <PublicRsvpForm invitationId={invitation.id} tone="light" accent={accent} />
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Ucapan */}
+      {c.guestMessageEnabled !== false ? (
+        <section className="mx-auto max-w-4xl border-t border-[#2f3437]/10 px-6 py-20">
+          <div className="grid gap-10 lg:grid-cols-[200px_1fr]">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.4em] text-[#2f3437]/60">
+                ucapan
+              </p>
+              <h2 className="mt-2 font-display text-4xl">Pesan tamu</h2>
+            </div>
+            <div className="space-y-10">
+              <PublicGuestMessageForm
+                invitationId={invitation.id}
+                tone="light"
+                accent={accent}
+              />
+              <GuestMessagesList invitationId={invitation.id} tone="light" />
+            </div>
+          </div>
         </section>
       ) : null}
 

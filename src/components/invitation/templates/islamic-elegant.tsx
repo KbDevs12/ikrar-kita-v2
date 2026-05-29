@@ -13,6 +13,9 @@ import Link from "next/link"
 import type { InvitationTemplateProps } from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
+import { PublicRsvpForm } from "../sections/rsvp-form"
+import { PublicGuestMessageForm } from "../sections/guest-message-form"
+import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
 interface InvitationContent {
@@ -24,6 +27,8 @@ interface InvitationContent {
   openingQuote?: string
   giftEnabled?: boolean
   giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
+  rsvpEnabled?: boolean
+  guestMessageEnabled?: boolean
   mapsUrl?: string
 }
 
@@ -344,6 +349,55 @@ export function IslamicElegant({ invitation, recipient }: InvitationTemplateProp
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {/* RSVP */}
+      {c.rsvpEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <header className="text-center">
+            <EightPointStar
+              className="mx-auto h-7 w-7"
+              style={{ color: accent }}
+            />
+            <h2
+              className="mt-4 font-display text-3xl"
+              style={{ color: accent }}
+            >
+              Konfirmasi Kehadiran
+            </h2>
+          </header>
+          <div className="mt-8 rounded-lg bg-[#f9f1d9] p-6">
+            <PublicRsvpForm invitationId={invitation.id} tone="light" accent={accent} />
+          </div>
+        </section>
+      ) : null}
+
+      {/* Ucapan & doa */}
+      {c.guestMessageEnabled !== false ? (
+        <section className="relative z-10 mx-auto max-w-xl px-6 py-16">
+          <header className="text-center">
+            <EightPointStar
+              className="mx-auto h-7 w-7"
+              style={{ color: accent }}
+            />
+            <h2
+              className="mt-4 font-display text-3xl"
+              style={{ color: accent }}
+            >
+              Ucapan &amp; Doa
+            </h2>
+          </header>
+          <div className="mt-8 rounded-lg bg-[#f9f1d9] p-6">
+            <PublicGuestMessageForm
+              invitationId={invitation.id}
+              tone="light"
+              accent={accent}
+            />
+          </div>
+          <div className="mt-8">
+            <GuestMessagesList invitationId={invitation.id} tone="light" />
+          </div>
         </section>
       ) : null}
 
