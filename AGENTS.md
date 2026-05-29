@@ -108,22 +108,31 @@ Jangan duplikasi schema. Selalu import dari `src/lib/validators/<domain>.ts`.
 
 Aplikasi mendaftarkan 10 template di
 `src/lib/constants/invitation-templates.ts` dan men-render-nya lewat
-`src/components/invitation/templates/registry.ts`.
+`src/components/invitation/templates/registry.ts`. **Semua 10 template kini
+memiliki implementasi bespoke** — masing-masing punya strategi visual yang
+genuinely berbeda (layout, tipografi, ornamen), bukan sekadar ganti palet.
 
-Implementasi bespoke saat ini (karakter visual benar-benar berbeda):
+Ringkasan karakter visual:
 
 - `classic-elegant` — ivory + thin gold rule, asymmetric centred hero
 - `modern-minimalist` — editorial split, oversized first names, hairline timeline
+- `rustic-garden` — scrapbook polaroid + LeafSprig, schedule sebagai vertical "branch"
+- `luxury-gold` — center-symmetric stacks, gilt double frames, GiltRule divider
 - `soft-pastel` — peach/lilac watercolour blobs, tilted overlapping cards
+- `traditional-indonesian` — BatikCorner SVG, SongketDivider, scroll cartouche
+- `islamic-elegant` — mihrab arches, EightPointStar, Bismillah hero
+- `dark-romance` — cinematic letterbox, copper-on-navy, gutter-anchored timeline
+- `floral-watercolor` — hand-painted Bouquet SVG anchors, garlanded panels
+- `cinematic-story` — chapter scaffold (I/II/III), full-bleed hero, scene labels
 
-Sisanya untuk sementara delegasi ke sibling terdekat di `registry.ts`
-(diberi komentar `TODO bespoke`). Saat menambah template baru:
+Saat menambah / mengganti template:
 
-1. Buat folder file sendiri di `src/components/invitation/templates/<id>.tsx`.
-2. Pastikan layout, tipografi, dan ornamen benar-benar berbeda dari template
-   lain — bukan sekadar ganti palet.
-3. Daftarkan di `registry.ts` menggantikan fallback.
-4. Tambahkan visual regression / snapshot test bila memungkinkan.
+1. Buat file sendiri di `src/components/invitation/templates/<id>.tsx`.
+2. Pastikan layout, tipografi, dan ornamen genuinely berbeda dari template
+   lain — bukan sekadar ganti palet warna.
+3. Daftarkan di `registry.ts` sebagai `dynamic` import sehingga halaman publik
+   hanya memuat byte tema yang dipilih.
+4. Tambahkan visual / snapshot test bila memungkinkan.
 
 Setiap template wajib menerima `InvitationTemplateProps` dan menampilkan:
 opening, hero, quote, detail pasangan, jadwal, countdown, lokasi/peta,
