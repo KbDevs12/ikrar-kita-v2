@@ -2,6 +2,7 @@ import Link from "next/link"
 import { ResendVerificationForm } from "@/components/forms/resend-verification-form"
 import { requireSessionOrRedirect } from "@/server/auth/guards"
 import { redirect } from "next/navigation"
+import { FloralCorner } from "@/components/auth/floral-corner"
 
 export const metadata = { title: "Verifikasi email" }
 
@@ -10,37 +11,58 @@ export default async function VerifyEmailPendingPage() {
   if (session.user.emailVerifiedAt) redirect("/dashboard")
 
   return (
-    <main className="grid min-h-screen place-items-center bg-background px-6 py-12">
-      <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-sm">
-        <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-700" aria-hidden>
-          ✦
-        </div>
-        <h1 className="text-center font-display text-2xl">Cek email Anda</h1>
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-          Kami sudah mengirim tautan verifikasi ke <strong>{session.user.email}</strong>.
-          Klik tautan tersebut untuk membuka dasbor sepenuhnya.
-        </p>
+    <main className="relative grid min-h-screen grid-cols-1 overflow-hidden bg-gradient-to-br from-rose-50 to-pink-50 lg:grid-cols-[1.2fr_minmax(380px,460px)]">
+      <FloralCorner className="pointer-events-none absolute -left-12 -top-12 h-72 w-72 -rotate-12 text-rose-200/70" />
+      <FloralCorner className="pointer-events-none absolute -bottom-20 -right-12 h-80 w-80 rotate-[170deg] text-rose-200/60" />
 
-        <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground">
-          Tidak menerima email? Periksa folder spam, atau minta tautan baru
-          di bawah ini.
+      <section className="relative flex flex-col justify-between p-8 md:p-12">
+        <Link href="/" className="font-display text-lg tracking-tight text-stone-900">
+          Ikrar Kita
+        </Link>
+
+        <div>
+          <p className="mb-4 text-xs uppercase tracking-[0.32em] text-rose-500">
+            Verifikasi diperlukan
+          </p>
+          <h1 className="font-display text-5xl leading-[0.95] tracking-tight text-stone-900 md:text-7xl">
+            Cek email
+            <span className="block italic text-rose-500">Anda dulu.</span>
+          </h1>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-stone-600">
+            Kami sudah mengirim tautan ke{" "}
+            <strong className="font-medium text-stone-900">{session.user.email}</strong>.
+            Klik tautan tersebut untuk membuka dasbor. Bila tidak menemukan,
+            cek juga folder spam.
+          </p>
         </div>
 
-        <div className="mt-6">
-          <ResendVerificationForm initialEmail={session.user.email} />
-        </div>
-
-        <div className="mt-6 flex items-center justify-between text-xs text-muted-foreground">
-          <Link href="/login" className="hover:text-foreground">
-            ← Kembali ke masuk
+        <div className="flex items-center gap-6 text-xs text-stone-500">
+          <Link href="/login" className="hover:text-stone-900">
+            ← Halaman masuk
           </Link>
           <form action="/api/auth/logout" method="post">
-            <button className="hover:text-foreground" type="submit">
+            <button type="submit" className="hover:text-stone-900">
               Keluar
             </button>
           </form>
         </div>
-      </div>
+      </section>
+
+      <section className="relative flex flex-col justify-center bg-white px-8 py-12 md:px-12">
+        <p className="text-xs uppercase tracking-[0.32em] text-rose-500">
+          Tidak menerima email?
+        </p>
+        <h2 className="mt-2 font-display text-3xl text-stone-900">
+          Kirim ulang tautannya.
+        </h2>
+        <p className="mt-2 text-sm text-stone-500">
+          Kami batasi pengiriman ulang setiap 60 detik. Pastikan email yang
+          Anda masukkan benar.
+        </p>
+        <div className="mt-6">
+          <ResendVerificationForm initialEmail={session.user.email} />
+        </div>
+      </section>
     </main>
   )
 }

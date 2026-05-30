@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { FieldError } from "./field-error"
 import { resendVerificationSchema } from "@/lib/validators/auth"
 import { zodFieldValidator } from "@/lib/forms/zod-validators"
@@ -36,7 +35,6 @@ export function ResendVerificationForm({ initialEmail = "" }: { initialEmail?: s
         })
         return
       }
-      // Anti-enumeration: success message regardless of whether email exists
       setMessage({
         kind: "ok",
         text:
@@ -61,11 +59,14 @@ export function ResendVerificationForm({ initialEmail = "" }: { initialEmail?: s
       >
         {(field) => (
           <div>
-            <Label htmlFor={field.name}>Email</Label>
+            <label htmlFor={field.name} className="sr-only">
+              Email
+            </label>
             <Input
               id={field.name}
               name={field.name}
               type="email"
+              placeholder="Email Anda"
               autoComplete="email"
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -81,8 +82,8 @@ export function ResendVerificationForm({ initialEmail = "" }: { initialEmail?: s
         <p
           className={
             message.kind === "ok"
-              ? "rounded-md bg-sage-100 px-3 py-2 text-xs text-sage-700"
-              : "rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive"
+              ? "rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700"
+              : "rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700"
           }
           role={message.kind === "error" ? "alert" : "status"}
         >
@@ -98,7 +99,7 @@ export function ResendVerificationForm({ initialEmail = "" }: { initialEmail?: s
             className="w-full"
             disabled={!canSubmit || isSubmitting}
           >
-            {isSubmitting ? "Mengirim..." : "Kirim ulang tautan verifikasi"}
+            {isSubmitting ? "Mengirim…" : "Kirim ulang tautan verifikasi"}
           </Button>
         )}
       </form.Subscribe>
