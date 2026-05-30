@@ -2,13 +2,20 @@
 
 import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
-import { MapPin, Search, Loader2 } from "lucide-react"
+import {
+  MapPin,
+  Search,
+  Loader2,
+  CheckCircle2,
+  ExternalLink,
+  AlertTriangle,
+} from "lucide-react"
 import "leaflet/dist/leaflet.css"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { isShortMapsUrl, parseLatLngFromMapsUrl } from "@/lib/utils/maps"
+import { buildGoogleMapsHref, isShortMapsUrl, parseLatLngFromMapsUrl } from "@/lib/utils/maps"
 
 const LocationMapPreview = dynamic(
   () => import("./location-map-preview").then((m) => m.LocationMapPreview),
@@ -23,8 +30,6 @@ const LocationMapPreview = dynamic(
 )
 
 const URL_ERROR = "URL tidak valid. Salin link lengkap dari Google Maps lalu paste di sini."
-const SHORT_URL_HINT =
-  "Link pendek Google Maps tidak bisa dibaca otomatis. Buka link itu di browser, lalu salin URL lengkap dari address bar."
 
 export interface LocationValue {
   mapsUrl?: string
@@ -70,8 +75,8 @@ type SearchState =
  * UX-friendly location picker. Primary flow: paste a Google Maps URL and the
  * coordinates fill in automatically. Secondary flow: search an address via
  * Nominatim (OpenStreetMap). Either way `latitude`/`longitude` end up in form
- * state and a live Leaflet preview confirms the spot. Lat/lng are shown
- * read-only - the user never types raw coordinates.
+ * state and a live Leaflet preview confirms the spot. Lat/lng are shown as a
+ * read-only pill - the user never types raw coordinates.
  */
 export function LocationPicker({
   mapsUrl,
@@ -82,6 +87,8 @@ export function LocationPicker({
   disabled,
 }: LocationPickerProps) {
   const [urlError, setUrlError] = useState<string | null>(null)
+  const [isShortUrl, setIsShortUrl] = useState(false)
+  const [parseSuccess, setParseSuccess] = useState(false)
   const [query, setQuery] = useState("")
   const [search, setSearch] = useState<SearchState>({ status: "idle" })
   const abortRef = useRef<AbortController | null>(null)
@@ -96,19 +103,27 @@ export function LocationPicker({
     const trimmed = next.trim()
     if (trimmed.length === 0) {
       setUrlError(null)
+      setIsShortUrl(false)
+      setParseSuccess(false)
       return
     }
     const parsed = parseLatLngFromMapsUrl(trimmed)
     if (parsed) {
       setUrlError(null)
+      setIsShortUrl(false)
+      setParseSuccess(true)
       onChange({ latitude: parsed.lat, longitude: parsed.lng })
       return
     }
-    // Only surface the error once the input actually looks like a pasted URL,
+    setParseSuccess(false)
+    // Only surface an error once the input actually looks like a pasted URL,
     // so we don't nag mid-typing.
     if (/^https?:\/\//i.test(trimmed)) {
-      setUrlError(isShortMapsUrl(trimmed) ? SHORT_URL_HINT : URL_ERROR)
+      const short = isShortMapsUrl(trimmed)
+      setIsShortUrl(short)
+      setUrlError(short ? null : URL_ERROR)
     } else {
+      setIsShortUrl(false)
       setUrlError(null)
     }
   }
@@ -156,13 +171,22 @@ export function LocationPicker({
     setSearch({ status: "idle" })
     setQuery("")
     setUrlError(null)
+    setIsShortUrl(false)
+    setParseSuccess(false)
   }
+
+  const hasCoords = typeof latitude === "number" && typeof longitude === "number"
 
   return (
     <div className="mt-3 space-y-5">
-      {/* Primary: Google Maps URL */}
-      <div>
-        <Label htmlFor="location-maps-url">Link Google Maps</Label>
+      {/* Primary: Google Maps URL (recommended) */}
+      <div className="rounded-xl border-2 border-rose-200 bg-rose-50/50 p-4">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-medium text-white">
+            Rekomendasi
+          </span>
+          <Label htmlFor="location-maps-url">Paste link Google Maps</Label>
+        </div>
         <Input
           id="location-maps-url"
           type="url"
@@ -178,17 +202,44 @@ export function LocationPicker({
           <p id="location-maps-error" className="mt-1.5 text-xs text-rose-600" role="alert">
             {urlError}
           </p>
+        ) : parseSuccess ? (
+          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-600 duration-200 animate-in fade-in">
+            <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+            Koordinat berhasil dibaca
+          </p>
         ) : (
           <p id="location-maps-help" className="mt-1.5 text-xs text-stone-500">
             Buka lokasi di Google Maps, tekan Bagikan, salin tautannya, lalu
             tempel di sini. Koordinat akan terisi otomatis.
           </p>
         )}
+
+        {isShortUrl ? (
+          <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+            <p className="mb-1 flex items-center gap-1.5 font-medium">
+              <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
+              Link pendek tidak bisa dibaca otomatis
+            </p>
+            <ol className="list-inside list-decimal space-y-0.5 text-amber-700">
+              <li>Buka link itu di browser</li>
+              <li>Tunggu halaman Google Maps terbuka penuh</li>
+              <li>Salin URL dari address bar browser</li>
+              <li>Tempel di sini</li>
+            </ol>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Separator */}
+      <div className="relative flex items-center py-1">
+        <div className="flex-1 border-t border-stone-200" />
+        <span className="px-3 text-xs text-stone-400">atau cari manual</span>
+        <div className="flex-1 border-t border-stone-200" />
       </div>
 
       {/* Secondary: address search */}
       <div>
-        <Label htmlFor="location-search">Atau cari alamat</Label>
+        <Label htmlFor="location-search">Cari alamat</Label>
         <div className="flex gap-2">
           <Input
             id="location-search"
@@ -250,33 +301,27 @@ export function LocationPicker({
         ) : null}
       </div>
 
-      {/* Read-only coordinates + live preview */}
+      {/* Coordinates pill + live preview */}
       <div>
-        <Label>Koordinat lokasi</Label>
-        <div className="grid grid-cols-2 gap-3">
-          <Input
-            readOnly
-            value={typeof latitude === "number" ? latitude.toFixed(6) : ""}
-            placeholder="Latitude"
-            aria-label="Latitude (otomatis)"
-            tabIndex={-1}
-            className="bg-stone-50 text-stone-600"
-          />
-          <Input
-            readOnly
-            value={typeof longitude === "number" ? longitude.toFixed(6) : ""}
-            placeholder="Longitude"
-            aria-label="Longitude (otomatis)"
-            tabIndex={-1}
-            className="bg-stone-50 text-stone-600"
-          />
-        </div>
+        <Label>Titik lokasi</Label>
+        {typeof latitude === "number" && typeof longitude === "number" ? (
+          <div className="mt-1.5 flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-4 py-2">
+            <MapPin className="h-4 w-4 shrink-0 text-rose-400" aria-hidden />
+            <span className="text-sm tabular-nums text-stone-600">
+              {latitude.toFixed(6)}, {longitude.toFixed(6)}
+            </span>
+          </div>
+        ) : (
+          <p className="mt-1.5 text-xs text-stone-500">
+            Koordinat akan terisi otomatis dari link Google Maps atau hasil
+            pencarian.
+          </p>
+        )}
 
         <div
           className={cn(
-            "mt-3 aspect-[16/10] w-full overflow-hidden rounded-xl border border-rose-200",
-            !(typeof latitude === "number" && typeof longitude === "number") &&
-              "grid place-items-center bg-stone-50"
+            "mt-3 aspect-[4/3] w-full overflow-hidden rounded-xl border border-rose-200",
+            !hasCoords && "grid place-items-center bg-stone-50"
           )}
         >
           {typeof latitude === "number" && typeof longitude === "number" ? (
@@ -288,6 +333,18 @@ export function LocationPicker({
             </p>
           )}
         </div>
+
+        {hasCoords ? (
+          <a
+            href={buildGoogleMapsHref({ latitude, longitude, mapsUrl })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 text-sm text-rose-500 hover:text-rose-600"
+          >
+            <ExternalLink className="h-4 w-4" aria-hidden />
+            Buka di Google Maps
+          </a>
+        ) : null}
       </div>
     </div>
   )
