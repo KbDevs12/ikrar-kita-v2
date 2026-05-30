@@ -91,10 +91,7 @@ export const DEFAULT_OPENING_QUOTES: Record<TemplateId, string> = {
     "Malam-malam paling tenang sering kali membawa kabar paling besar. Hari ini salah satunya.",
   "floral-watercolor":
     "Bunga-bunga ini kami kumpulkan satu per satu dari hari-hari yang panjang menjadi kami berdua.",
-  "cinematic-story":
-    "Setiap pasangan punya cerita. Ini bagian yang ingin kami bagi dengan Anda.",
-<<<<<<< HEAD
-=======
+  "cinematic-story": "Setiap pasangan punya cerita. Ini bagian yang ingin kami bagi dengan Anda.",
   "javanese-royal":
     "Sinambungan tresna ingkang luhur, kawiwitan saking pangestu. Sugeng rawuh ngestreni dhauping putra-putri kami.",
   "sundanese-nature":
@@ -135,7 +132,6 @@ export const DEFAULT_OPENING_QUOTES: Record<TemplateId, string> = {
     "Dalam kesederhanaan yang ditata dengan teliti, kami menemukan keindahan yang ingin kami jaga selamanya.",
   "folk-art":
     "Dari hal-hal kecil yang dibuat dengan tangan dan hati, kami merangkai kisah sederhana yang ingin kami bagi.",
->>>>>>> origin/fix/map-container-and-new-templates
 }
 
 export function getDefaultOpeningQuote(theme: string): string {
