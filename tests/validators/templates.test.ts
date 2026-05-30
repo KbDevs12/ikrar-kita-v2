@@ -6,9 +6,9 @@ import {
 } from "@/lib/constants/invitation-templates"
 
 describe("invitation template registry", () => {
-  it("contains exactly 10 templates", () => {
-    expect(INVITATION_TEMPLATES).toHaveLength(10)
-    expect(TEMPLATE_IDS).toHaveLength(10)
+  it("contains exactly 30 templates", () => {
+    expect(INVITATION_TEMPLATES).toHaveLength(30)
+    expect(TEMPLATE_IDS).toHaveLength(30)
   })
 
   it("ids are unique", () => {
