@@ -6,6 +6,9 @@ import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
+import { TimePicker } from "@/components/ui/time-picker"
+import { LocationPicker } from "@/components/forms/location-picker"
 import { FieldError } from "./field-error"
 import {
   invitationCreateSchema,
@@ -17,6 +20,7 @@ import {
   stepThemeSchema,
 } from "@/lib/validators/invitation"
 import { zodFieldValidator } from "@/lib/forms/zod-validators"
+import { rebaseDateKeepTime } from "@/lib/utils/datetime"
 import { INVITATION_TEMPLATES } from "@/lib/constants/invitation-templates"
 import { cn } from "@/lib/utils"
 
@@ -289,46 +293,55 @@ function StepEvent({ form }: StepProps) {
   return (
     <section>
       <header className="mb-6">
-        <h2 className="font-display text-2xl">Tanggal & jadwal</h2>
+        <h2 className="font-display text-2xl">Tanggal &amp; jadwal</h2>
         <p className="text-sm text-muted-foreground">
           Tambahkan satu atau beberapa rangkaian acara.
         </p>
       </header>
 
       <FieldText form={form} name="title" label="Judul undangan (opsional)" />
-      <FieldText
-        form={form}
-        name="eventDate"
-        label="Tanggal acara utama"
-        type="datetime-local"
-        required
-      />
+
+      {/* Event date - the picker owns the calendar day; when it changes we
+          re-base every schedule item onto the new day while keeping the
+          hour/minute the user already chose. */}
+      <form.Field name="eventDate">
+        {(field) => (
+          <div className="mt-3">
+            <Label htmlFor={field.name}>
+              Tanggal acara utama <span className="text-destructive">*</span>
+            </Label>
+            <DatePicker
+              value={(field.state.value as string) || undefined}
+              onChange={(iso) => {
+                field.handleChange(iso as never)
+                const schedule = form.state.values.schedule
+                form.setFieldValue(
+                  "schedule",
+                  schedule.map((item) => ({
+                    ...item,
+                    startsAt: rebaseDateKeepTime(item.startsAt, iso),
+                    endsAt: rebaseDateKeepTime(item.endsAt, iso),
+                  })) as never
+                )
+              }}
+            />
+            <FieldError message={field.state.meta.errors[0] ?? null} />
+          </div>
+        )}
+      </form.Field>
 
       <form.Field name="schedule" mode="array">
         {(field) => (
           <div className="mt-6 space-y-4">
             {field.state.value.map((_, i) => (
-              <div
-                key={i}
-                className="rounded-lg border border-border bg-muted/30 p-4"
-              >
-                <FieldText
-                  form={form}
-                  name={`schedule[${i}].label`}
-                  label="Nama rangkaian"
-                />
+              <div key={i} className="rounded-lg border border-border bg-muted/30 p-4">
+                <FieldText form={form} name={`schedule[${i}].label`} label="Nama rangkaian" />
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <FieldText
-                    form={form}
-                    name={`schedule[${i}].startsAt`}
-                    label="Mulai"
-                    type="datetime-local"
-                  />
-                  <FieldText
+                  <TimeField form={form} name={`schedule[${i}].startsAt`} label="Mulai" />
+                  <TimeField
                     form={form}
                     name={`schedule[${i}].endsAt`}
                     label="Selesai (opsional)"
-                    type="datetime-local"
                   />
                 </div>
                 <FieldText form={form} name={`schedule[${i}].notes`} label="Catatan (opsional)" />
@@ -348,9 +361,7 @@ function StepEvent({ form }: StepProps) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={() =>
-                field.pushValue({ label: "", startsAt: "", endsAt: "", notes: "" })
-              }
+              onClick={() => field.pushValue({ label: "", startsAt: "", endsAt: "", notes: "" })}
             >
               + Tambah rangkaian
             </Button>
@@ -361,23 +372,77 @@ function StepEvent({ form }: StepProps) {
   )
 }
 
+/**
+ * Time field for schedule items. Subscribes to `eventDate` so the picker
+ * always inherits the current event day; only the hour/minute is chosen here.
+ */
+function TimeField({ form, name, label }: { form: StepProps["form"]; name: string; label: string }) {
+  return (
+    <form.Subscribe selector={(s) => (s.values.eventDate as string) || ""}>
+      {(eventDate) => (
+        <form.Field name={name as never}>
+          {(field) => (
+            <div className="mt-3">
+              <Label htmlFor={field.name}>{label}</Label>
+              <TimePicker
+                value={(field.state.value as string) || undefined}
+                dateValue={eventDate || undefined}
+                onChange={(iso) => field.handleChange(iso as never)}
+              />
+              <FieldError message={field.state.meta.errors[0] ?? null} />
+            </div>
+          )}
+        </form.Field>
+      )}
+    </form.Subscribe>
+  )
+}
+
 function StepLocation({ form }: StepProps) {
   return (
     <section>
       <header className="mb-6">
         <h2 className="font-display text-2xl">Lokasi</h2>
         <p className="text-sm text-muted-foreground">
-          Alamat lengkap akan ditampilkan beserta tombol buka di Google Maps.
+          Tempel link Google Maps atau cari alamat — koordinat dan peta terisi
+          otomatis.
         </p>
       </header>
 
       <FieldText form={form} name="venueName" label="Nama lokasi" required />
       <FieldTextarea form={form} name="venueAddress" label="Alamat lengkap" rows={3} required />
-      <FieldText form={form} name="mapsUrl" label="URL Google Maps (opsional)" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FieldNumber form={form} name="latitude" label="Latitude (opsional)" step={0.000001} />
-        <FieldNumber form={form} name="longitude" label="Longitude (opsional)" step={0.000001} />
-      </div>
+
+      <form.Subscribe
+        selector={(s) => ({
+          mapsUrl: (s.values.mapsUrl as string) ?? "",
+          latitude: s.values.latitude as number | undefined,
+          longitude: s.values.longitude as number | undefined,
+          venueAddress: (s.values.venueAddress as string) ?? "",
+        })}
+      >
+        {(loc) => (
+          <LocationPicker
+            mapsUrl={loc.mapsUrl}
+            latitude={loc.latitude}
+            longitude={loc.longitude}
+            venueAddress={loc.venueAddress}
+            onChange={(patch) => {
+              if (patch.mapsUrl !== undefined) {
+                form.setFieldValue("mapsUrl", patch.mapsUrl as never)
+              }
+              if (patch.latitude !== undefined) {
+                form.setFieldValue("latitude", patch.latitude as never)
+              }
+              if (patch.longitude !== undefined) {
+                form.setFieldValue("longitude", patch.longitude as never)
+              }
+              if (patch.venueAddress !== undefined) {
+                form.setFieldValue("venueAddress", patch.venueAddress as never)
+              }
+            }}
+          />
+        )}
+      </form.Subscribe>
     </section>
   )
 }
@@ -582,40 +647,6 @@ function FieldText({ form, name, label, required, type = "text", placeholder }: 
             onBlur={field.handleBlur}
             onChange={(e) => field.handleChange(e.target.value as never)}
             required={required}
-          />
-          <FieldError message={field.state.meta.errors[0] ?? null} />
-        </div>
-      )}
-    </form.Field>
-  )
-}
-
-function FieldNumber({
-  form,
-  name,
-  label,
-  step,
-}: {
-  form: ReturnType<typeof useForm<BuilderValues>> // eslint-disable-line @typescript-eslint/no-explicit-any
-  name: string
-  label: string
-  step?: number
-}) {
-  return (
-    <form.Field name={name as never}>
-      {(field) => (
-        <div className="mt-3">
-          <Label htmlFor={field.name}>{label}</Label>
-          <Input
-            id={field.name}
-            type="number"
-            step={step}
-            value={(field.state.value as number | undefined) ?? ""}
-            onBlur={field.handleBlur}
-            onChange={(e) => {
-              const v = e.target.value
-              field.handleChange((v === "" ? undefined : Number(v)) as never)
-            }}
           />
           <FieldError message={field.state.meta.errors[0] ?? null} />
         </div>
