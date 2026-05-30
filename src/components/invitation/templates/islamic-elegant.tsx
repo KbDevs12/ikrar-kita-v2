@@ -10,11 +10,16 @@
  *     contemplation. Bismillah space at the very top.
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -84,9 +89,10 @@ function MihrabFrame({
 export function IslamicElegant({ invitation, recipient }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#264a3a"
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("islamic-elegant")
 
   return (
-    <article
+    <article id="top"
       className="relative min-h-screen overflow-hidden text-[#22311f]"
       style={{ background: "linear-gradient(180deg, #f7f0dc 0%, #f1e7ce 100%)" }}
     >
@@ -141,17 +147,15 @@ export function IslamicElegant({ invitation, recipient }: InvitationTemplateProp
       </header>
 
       {/* Quote / Ayat */}
-      {c.openingQuote ? (
-        <section className="relative z-10 mx-auto max-w-xl px-6 py-20 text-center">
-          <EightPointStar className="mx-auto h-7 w-7" style={{ color: accent }} />
-          <blockquote
-            className="mt-6 font-serif text-xl italic leading-relaxed sm:text-2xl"
-            style={{ color: accent }}
-          >
-            “{c.openingQuote}”
-          </blockquote>
-        </section>
-      ) : null}
+      <section className="relative z-10 mx-auto max-w-xl px-6 py-20 text-center">
+        <EightPointStar className="mx-auto h-7 w-7" style={{ color: accent }} />
+        <blockquote
+          className="mt-6 font-serif text-xl italic leading-relaxed sm:text-2xl"
+          style={{ color: accent }}
+        >
+          “{quote}”
+        </blockquote>
+      </section>
 
       {/* Couple - mihrab arches */}
       <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
@@ -286,31 +290,54 @@ export function IslamicElegant({ invitation, recipient }: InvitationTemplateProp
 
       {/* Map */}
       {invitation.venueName ? (
-        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16 text-center">
-          <h2 className="font-display text-3xl" style={{ color: accent }}>
+        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16">
+          <h2 className="text-center font-display text-3xl" style={{ color: accent }}>
             {invitation.venueName}
           </h2>
           {invitation.venueAddress ? (
-            <p className="mt-3 font-serif text-base italic">
+            <p className="mt-3 text-center font-serif text-base italic">
               {invitation.venueAddress}
             </p>
           ) : null}
-          {c.mapsUrl ||
-          (typeof invitation.latitude === "number" &&
-            typeof invitation.longitude === "number") ? (
+          <div className="mt-8">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-[#264a3a]/20"
+            />
+          </div>
+          <div className="mt-6 text-center">
             <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
+              href={buildGoogleMapsHref({
+                latitude: invitation.latitude,
+                longitude: invitation.longitude,
+                mapsUrl: c.mapsUrl,
+              })}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block rounded-full px-6 py-2.5 text-sm font-medium text-[#f4ecd8]"
+              className="inline-block rounded-full px-6 py-2.5 text-sm font-medium text-[#f4ecd8]"
               style={{ background: accent }}
             >
               Buka peta lokasi
             </Link>
-          ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
+          <header className="text-center">
+            <EightPointStar className="mx-auto h-7 w-7" style={{ color: accent }} />
+            <h2 className="mt-4 font-display text-3xl" style={{ color: accent }}>
+              Galeri
+            </h2>
+          </header>
+          <div className="mt-10">
+            <Gallery urls={c.galleryUrls} variant="circle" />
+          </div>
         </section>
       ) : null}
 
@@ -405,7 +432,14 @@ export function IslamicElegant({ invitation, recipient }: InvitationTemplateProp
         <p className="mt-6 font-display text-2xl" style={{ color: accent }}>
           {invitation.groomName} &amp; {invitation.brideName}
         </p>
+        <p className="mt-6 text-xs">
+          <a href="#top" className="text-[#22311f]/60 underline-offset-4 hover:text-[#22311f] hover:underline">
+            Kembali ke atas ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="light" />
     </article>
   )
 }

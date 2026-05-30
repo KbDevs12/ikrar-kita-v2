@@ -1,4 +1,5 @@
 import type { PublicInvitationView } from "@/server/invitation/cache"
+import type { TemplateId } from "@/lib/constants/invitation-templates"
 
 /**
  * Common props shared by every invitation template.
@@ -60,4 +61,43 @@ export interface InvitationContent {
 export function readContent(value: unknown): InvitationContent {
   if (!value || typeof value !== "object") return {}
   return value as InvitationContent
+}
+
+/**
+ * Fallback opening quote per template.
+ *
+ * Templates use this when the user did not write their own openingQuote -
+ * each line is hand-written to fit the template's mood (heritage line for
+ * traditional-indonesian, Quranic blessing for islamic-elegant, cinematic
+ * voice for cinematic-story, etc) so the fallback never reads as a generic
+ * filler.
+ */
+export const DEFAULT_OPENING_QUOTES: Record<TemplateId, string> = {
+  "classic-elegant":
+    "Sebab cinta yang sederhana, dirayakan dengan tenang, akan tetap utuh sepanjang waktu.",
+  "modern-minimalist":
+    "Dua orang. Satu hari. Satu janji yang ditulis dengan kata-kata kami sendiri.",
+  "rustic-garden":
+    "Seperti pohon yang akarnya saling melingkar di bawah tanah, kami pun bertumbuh diam-diam.",
+  "luxury-gold":
+    "Diiringi syukur kepada Yang Maha Pengasih, kami merangkai hari yang sudah lama kami nantikan.",
+  "soft-pastel":
+    "Di antara hari-hari yang berlalu cepat, kami memilih hari ini untuk berhenti dan saling berjanji.",
+  "traditional-indonesian":
+    "Sirih kuning bertangkai gading, kasih bersambut tak ada tandingnya. Mohon datang membawa restu.",
+  "islamic-elegant":
+    "Dan di antara tanda-tanda kekuasaan-Nya, Dia ciptakan untukmu pasangan dari jenismu sendiri, supaya kamu cenderung dan merasa tenteram kepadanya. — QS Ar-Rum: 21",
+  "dark-romance":
+    "Malam-malam paling tenang sering kali membawa kabar paling besar. Hari ini salah satunya.",
+  "floral-watercolor":
+    "Bunga-bunga ini kami kumpulkan satu per satu dari hari-hari yang panjang menjadi kami berdua.",
+  "cinematic-story":
+    "Setiap pasangan punya cerita. Ini bagian yang ingin kami bagi dengan Anda.",
+}
+
+export function getDefaultOpeningQuote(theme: string): string {
+  if (theme in DEFAULT_OPENING_QUOTES) {
+    return DEFAULT_OPENING_QUOTES[theme as TemplateId]
+  }
+  return DEFAULT_OPENING_QUOTES["classic-elegant"]
 }

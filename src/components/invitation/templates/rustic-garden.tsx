@@ -12,11 +12,16 @@
  * are tilted in opposite directions instead of perfectly aligned.
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -60,9 +65,10 @@ function LeafSprig({
 export function RusticGarden({ invitation, recipient }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#577d52"
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("rustic-garden")
 
   return (
-    <article
+    <article id="top"
       className="relative min-h-screen overflow-hidden text-[#3a3528]"
       style={{
         background:
@@ -107,17 +113,15 @@ export function RusticGarden({ invitation, recipient }: InvitationTemplateProps)
       </header>
 
       {/* Quote on a torn-paper card */}
-      {c.openingQuote ? (
-        <section className="relative z-10 mx-auto max-w-xl px-6 py-12">
-          <blockquote className="relative rotate-[-0.5deg] rounded-sm border border-[#9ab895]/40 bg-[#fbf6e9] px-7 py-8 font-serif text-lg italic leading-snug shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)]">
-            <span
-              className="absolute -left-2 -top-2 inline-block h-5 w-5 rotate-12 bg-[#cdb887]"
-              aria-hidden
-            />
-            “{c.openingQuote}”
-          </blockquote>
-        </section>
-      ) : null}
+      <section className="relative z-10 mx-auto max-w-xl px-6 py-12">
+        <blockquote className="relative rotate-[-0.5deg] rounded-sm border border-[#9ab895]/40 bg-[#fbf6e9] px-7 py-8 font-serif text-lg italic leading-snug shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)]">
+          <span
+            className="absolute -left-2 -top-2 inline-block h-5 w-5 rotate-12 bg-[#cdb887]"
+            aria-hidden
+          />
+          “{quote}”
+        </blockquote>
+      </section>
 
       {/* Couple - polaroid-style cards, tilted opposite ways */}
       <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
@@ -179,27 +183,47 @@ export function RusticGarden({ invitation, recipient }: InvitationTemplateProps)
 
       {/* Map */}
       {invitation.venueName ? (
-        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16 text-center">
+        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16">
           <RusticHeading kicker="tempat acara" title={invitation.venueName} accent={accent} />
           {invitation.venueAddress ? (
-            <p className="mt-3 font-serif text-base italic">{invitation.venueAddress}</p>
+            <p className="mt-3 text-center font-serif text-base italic">
+              {invitation.venueAddress}
+            </p>
           ) : null}
-          {c.mapsUrl ||
-          (typeof invitation.latitude === "number" &&
-            typeof invitation.longitude === "number") ? (
+          <div className="mt-8">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[4/3] w-full overflow-hidden rounded-sm border border-sage-700/30 bg-[#fbf6e9]"
+            />
+          </div>
+          <div className="mt-6 text-center">
             <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
+              href={buildGoogleMapsHref({
+                latitude: invitation.latitude,
+                longitude: invitation.longitude,
+                mapsUrl: c.mapsUrl,
+              })}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block rounded-full border-2 border-dashed px-6 py-2.5 text-sm font-medium hover:bg-[#fbf6e9]"
+              className="inline-block rounded-full border-2 border-dashed px-6 py-2.5 text-sm font-medium hover:bg-[#fbf6e9]"
               style={{ borderColor: accent, color: accent }}
             >
               Lihat di peta →
             </Link>
-          ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
+          <RusticHeading kicker="album taman" title="Polaroid kami" accent={accent} />
+          <div className="mt-10">
+            <Gallery urls={c.galleryUrls} variant="polaroid" />
+          </div>
         </section>
       ) : null}
 
@@ -261,7 +285,14 @@ export function RusticGarden({ invitation, recipient }: InvitationTemplateProps)
         <p className="mt-6 font-display text-2xl">
           {invitation.groomName} &amp; {invitation.brideName}
         </p>
+        <p className="mt-6 text-xs">
+          <a href="#top" className="text-sage-700/70 underline-offset-4 hover:text-sage-700 hover:underline">
+            Kembali ke atas ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="light" />
     </article>
   )
 }

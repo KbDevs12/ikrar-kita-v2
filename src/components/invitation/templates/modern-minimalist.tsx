@@ -10,11 +10,16 @@
  * Differs from Classic Elegant in *layout* and *typography*, not just colour.
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -26,9 +31,10 @@ import { formatDateID } from "@/lib/utils"
 export function ModernMinimalist({ invitation, recipient }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#2f3437"
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("modern-minimalist")
 
   return (
-    <article className="min-h-screen bg-[#fafaf7] text-[#2f3437]">
+    <article id="top" className="min-h-screen bg-[#fafaf7] text-[#2f3437]">
       {/* Hero - fully editorial: oversized number date, restrained type */}
       <header className="border-b border-[#2f3437]/15">
         <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-32">
@@ -70,6 +76,30 @@ export function ModernMinimalist({ invitation, recipient }: InvitationTemplatePr
           </aside>
         </div>
       </header>
+
+      {/* Hero cover image (if any) - keeps the editorial split intact */}
+      {invitation.coverImageUrl ? (
+        <figure className="border-b border-[#2f3437]/10">
+          <div className="relative mx-auto aspect-[2/1] max-w-6xl">
+            <Image
+              src={invitation.coverImageUrl}
+              alt={`${invitation.groomName} & ${invitation.brideName}`}
+              fill
+              sizes="(max-width: 1024px) 100vw, 1152px"
+              className="object-cover"
+              priority
+            />
+          </div>
+        </figure>
+      ) : null}
+
+      {/* Quote */}
+      <section className="mx-auto max-w-3xl border-b border-[#2f3437]/10 px-6 py-20">
+        <p className="text-[11px] uppercase tracking-[0.4em] text-[#2f3437]/60">prolog</p>
+        <blockquote className="mt-4 font-display text-3xl leading-snug text-[#2f3437]">
+          “{quote}”
+        </blockquote>
+      </section>
 
       {/* Couple - two thin columns */}
       <section className="mx-auto grid max-w-4xl gap-12 px-6 py-20 sm:grid-cols-2">
@@ -145,22 +175,39 @@ export function ModernMinimalist({ invitation, recipient }: InvitationTemplatePr
               {invitation.venueAddress}
             </p>
           ) : null}
-          {(c.mapsUrl ||
-            (typeof invitation.latitude === "number" &&
-              typeof invitation.longitude === "number")) ? (
-            <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-8 inline-flex items-center gap-2 border-b border-current pb-1 text-sm font-medium"
-              style={{ color: accent }}
-            >
-              Buka peta →
-            </Link>
-          ) : null}
+          <div className="mt-8">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[16/9] w-full overflow-hidden border border-[#2f3437]/15"
+            />
+          </div>
+          <Link
+            href={buildGoogleMapsHref({
+              latitude: invitation.latitude,
+              longitude: invitation.longitude,
+              mapsUrl: c.mapsUrl,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-flex items-center gap-2 border-b border-current pb-1 text-sm font-medium"
+            style={{ color: accent }}
+          >
+            Buka peta →
+          </Link>
+        </section>
+      ) : null}
+
+      {/* Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <section className="mx-auto max-w-5xl px-6 py-20">
+          <p className="text-[11px] uppercase tracking-[0.4em] text-[#2f3437]/60">galeri</p>
+          <h2 className="mt-3 font-display text-4xl">Catatan visual</h2>
+          <div className="mt-10">
+            <Gallery urls={c.galleryUrls} variant="mosaic" />
+          </div>
         </section>
       ) : null}
 
@@ -234,7 +281,14 @@ export function ModernMinimalist({ invitation, recipient }: InvitationTemplatePr
         <p className="mt-2 text-sm text-[#2f3437]/60">
           Sebuah hari yang kami siapkan dengan tenang. Terima kasih sudah meluangkan waktu untuk kami.
         </p>
+        <p className="mt-6 text-xs">
+          <a href="#top" className="text-[#2f3437]/60 underline-offset-4 hover:text-[#2f3437] hover:underline">
+            Kembali ke atas ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="light" />
     </article>
   )
 }

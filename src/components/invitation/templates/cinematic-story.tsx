@@ -12,11 +12,16 @@
  *     dark-romance's copper-on-navy and modern-minimalist's hairline editorial.
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -77,21 +82,23 @@ function Chapter({
 export function CinematicStory({ invitation, recipient }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#e9d8ad"
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("cinematic-story")
 
   // Build the chapter sequence. Each chapter is conditional on data.
   let chapter = 0
 
   return (
-    <article className="relative min-h-screen overflow-hidden bg-[#0c0c0e] text-[#e6e3da]">
+    <article id="top" className="relative min-h-screen overflow-hidden bg-[#0c0c0e] text-[#e6e3da]">
       {/* Hero - full-bleed with cover image */}
       <header className="relative flex min-h-[100vh] flex-col items-start justify-end px-6 pb-16 pt-24">
         {invitation.coverImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={invitation.coverImageUrl}
             alt=""
-            className="absolute inset-0 h-full w-full object-cover opacity-70"
-            loading="eager"
+            fill
+            sizes="100vw"
+            className="object-cover opacity-70"
+            priority
             aria-hidden
           />
         ) : (
@@ -143,18 +150,16 @@ export function CinematicStory({ invitation, recipient }: InvitationTemplateProp
       </header>
 
       {/* Chapter I — Quote / Prologue */}
-      {c.openingQuote ? (
-        <Chapter
-          number={++chapter}
-          kicker="Prolog"
-          title="Sebuah pembuka"
-          accent={accent}
-        >
-          <blockquote className="font-serif text-2xl italic leading-snug text-white/85 sm:text-3xl">
-            “{c.openingQuote}”
-          </blockquote>
-        </Chapter>
-      ) : null}
+      <Chapter
+        number={++chapter}
+        kicker="Prolog"
+        title="Sebuah pembuka"
+        accent={accent}
+      >
+        <blockquote className="font-serif text-2xl italic leading-snug text-white/85 sm:text-3xl">
+          “{quote}”
+        </blockquote>
+      </Chapter>
 
       {/* Chapter — Couple */}
       <Chapter
@@ -242,22 +247,40 @@ export function CinematicStory({ invitation, recipient }: InvitationTemplateProp
               {invitation.venueAddress}
             </p>
           ) : null}
-          {c.mapsUrl ||
-          (typeof invitation.latitude === "number" &&
-            typeof invitation.longitude === "number") ? (
-            <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center gap-2 border-b border-current pb-1 text-sm"
-              style={{ color: accent }}
-            >
-              Buka peta →
-            </Link>
-          ) : null}
+          <div className="mt-6">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[16/9] w-full max-w-3xl overflow-hidden border border-white/10"
+            />
+          </div>
+          <Link
+            href={buildGoogleMapsHref({
+              latitude: invitation.latitude,
+              longitude: invitation.longitude,
+              mapsUrl: c.mapsUrl,
+            })}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex items-center gap-2 border-b border-current pb-1 text-sm"
+            style={{ color: accent }}
+          >
+            Buka peta →
+          </Link>
+        </Chapter>
+      ) : null}
+
+      {/* Chapter — Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <Chapter
+          number={++chapter}
+          kicker="Adegan"
+          title="Cuplikan"
+          accent={accent}
+        >
+          <Gallery urls={c.galleryUrls} variant="cinema" />
         </Chapter>
       ) : null}
 
@@ -339,7 +362,14 @@ export function CinematicStory({ invitation, recipient }: InvitationTemplateProp
         <p className="mt-3 max-w-md text-base text-white/70 mx-auto">
           Terima kasih telah membaca cerita kami sampai halaman terakhir.
         </p>
+        <p className="mt-8 text-xs">
+          <a href="#top" className="text-white/55 underline-offset-4 hover:text-white hover:underline">
+            Kembali ke halaman pertama ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="dark" />
     </article>
   )
 }

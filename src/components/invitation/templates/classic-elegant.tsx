@@ -12,9 +12,11 @@
  * the page does not feel like a stack of identical cards.
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
 import { Countdown } from "../sections/countdown"
@@ -22,15 +24,19 @@ import { formatScheduleDate, formatScheduleRange } from "../sections/section-hel
 import { PublicRsvpForm } from "../sections/rsvp-form"
 import { PublicGuestMessageForm } from "../sections/guest-message-form"
 import { GuestMessagesList } from "../sections/guest-messages-list"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { formatDateID } from "@/lib/utils"
 
 
 export function ClassicElegant({ invitation, recipient }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#8a6a3b"
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("classic-elegant")
 
   return (
-    <article className="relative min-h-screen overflow-hidden bg-[#f7f3ec] text-ink-700">
+    <article id="top" className="relative min-h-screen overflow-hidden bg-[#f7f3ec] text-ink-700">
       <div className="absolute inset-0 bg-grain opacity-40" aria-hidden />
 
       {/* Opening */}
@@ -62,14 +68,28 @@ export function ClassicElegant({ invitation, recipient }: InvitationTemplateProp
         ) : null}
       </header>
 
-      {/* Quote */}
-      {c.openingQuote ? (
-        <section className="relative z-10 mx-auto max-w-xl px-6 py-20 text-center">
-          <blockquote className="font-serif text-xl italic leading-snug text-ink-600 sm:text-2xl">
-            “{c.openingQuote}”
-          </blockquote>
-        </section>
+      {/* Hero cover image (if any) */}
+      {invitation.coverImageUrl ? (
+        <figure className="relative z-10 mx-auto mt-2 max-w-2xl overflow-hidden border-y border-ink-200/40">
+          <div className="relative aspect-[4/3] w-full">
+            <Image
+              src={invitation.coverImageUrl}
+              alt={`${invitation.groomName} & ${invitation.brideName}`}
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="object-cover"
+              priority
+            />
+          </div>
+        </figure>
       ) : null}
+
+      {/* Quote */}
+      <section className="relative z-10 mx-auto max-w-xl px-6 py-20 text-center">
+        <blockquote className="font-serif text-xl italic leading-snug text-ink-600 sm:text-2xl">
+          “{quote}”
+        </blockquote>
+      </section>
 
       {/* Couple */}
       <section className="relative z-10 mx-auto grid max-w-4xl gap-10 px-6 py-16 sm:grid-cols-2">
@@ -125,27 +145,45 @@ export function ClassicElegant({ invitation, recipient }: InvitationTemplateProp
 
       {/* Map */}
       {invitation.venueName ? (
-        <section className="relative z-10 mx-auto max-w-3xl px-6 py-16 text-center">
+        <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
           <SectionHeading accent={accent} kicker="Lokasi" title={invitation.venueName} />
           {invitation.venueAddress ? (
-            <p className="mt-3 font-serif text-base text-ink-600">{invitation.venueAddress}</p>
+            <p className="mt-3 text-center font-serif text-base text-ink-600">{invitation.venueAddress}</p>
           ) : null}
-          {(c.mapsUrl ||
-            (typeof invitation.latitude === "number" &&
-              typeof invitation.longitude === "number")) ? (
+          <div className="mx-auto mt-8 max-w-xl">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[4/3] w-full overflow-hidden rounded-md border border-ink-200/60"
+            />
+          </div>
+          <div className="mt-6 text-center">
             <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
+              href={buildGoogleMapsHref({
+                latitude: invitation.latitude,
+                longitude: invitation.longitude,
+                mapsUrl: c.mapsUrl,
+              })}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block border px-5 py-2.5 text-sm font-medium tracking-wide"
+              className="inline-block border px-5 py-2.5 text-sm font-medium tracking-wide"
               style={{ borderColor: accent, color: accent }}
             >
               Buka di Google Maps
             </Link>
-          ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <section className="relative z-10 mx-auto max-w-4xl px-6 py-16">
+          <SectionHeading accent={accent} kicker="Galeri" title="Momen kami" />
+          <div className="mt-10">
+            <Gallery urls={c.galleryUrls} variant="mosaic" />
+          </div>
         </section>
       ) : null}
 
@@ -211,7 +249,17 @@ export function ClassicElegant({ invitation, recipient }: InvitationTemplateProp
         <p className="mt-6 font-display text-2xl" style={{ color: accent }}>
           {invitation.groomName} &amp; {invitation.brideName}
         </p>
+        <p className="mt-8 text-xs">
+          <a
+            href="#top"
+            className="text-ink-500 underline-offset-4 hover:text-ink-700 hover:underline"
+          >
+            Kembali ke atas ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="light" />
     </article>
   )
 }
