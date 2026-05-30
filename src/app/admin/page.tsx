@@ -11,35 +11,41 @@ export default async function AdminOverview() {
       _sum: { amount: true },
       where: {
         status: "PAID",
-        paidAt: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        },
+        paidAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) },
       },
     }),
     prisma.subscription.count({ where: { status: "ACTIVE" } }),
   ])
 
   const stats = [
-    { label: "Pengguna", value: totalUsers.toLocaleString("id-ID") },
-    { label: "Invoice menunggu", value: pendingInvoices.toLocaleString("id-ID") },
-    { label: "Pendapatan bulan ini", value: formatRupiah(paidThisMonth._sum.amount ?? 0) },
+    { label: "Pengguna terdaftar", value: totalUsers.toLocaleString("id-ID") },
+    { label: "Menunggu pembayaran", value: pendingInvoices.toLocaleString("id-ID") },
+    {
+      label: "Pendapatan bulan ini",
+      value: formatRupiah(paidThisMonth._sum.amount ?? 0),
+    },
     { label: "Langganan aktif", value: activeSubs.toLocaleString("id-ID") },
   ]
 
   return (
-    <div className="px-8 py-10">
-      <header className="mb-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Admin</p>
-        <h1 className="mt-1 font-display text-3xl">Ringkasan operasional</h1>
+    <article className="px-8 py-12 lg:px-14 lg:py-16">
+      <header className="mb-12 border-b border-stone-200 pb-8">
+        <p className="text-xs uppercase tracking-[0.32em] text-stone-500">Operasi</p>
+        <h1 className="mt-3 font-display text-5xl leading-[1] tracking-tight text-stone-900 md:text-6xl">
+          Ringkasan harian
+        </h1>
       </header>
-      <div className="grid gap-4 lg:grid-cols-4">
+
+      <section className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
-          <div key={s.label} className="rounded-xl border border-border bg-card p-5">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">{s.label}</p>
-            <p className="mt-2 font-display text-2xl tabular-nums">{s.value}</p>
+          <div key={s.label}>
+            <p className="text-xs uppercase tracking-[0.32em] text-stone-500">{s.label}</p>
+            <p className="mt-3 font-display text-5xl leading-none tracking-tight text-stone-900 md:text-6xl">
+              {s.value}
+            </p>
           </div>
         ))}
-      </div>
-    </div>
+      </section>
+    </article>
   )
 }
