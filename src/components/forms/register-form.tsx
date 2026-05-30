@@ -9,6 +9,7 @@ import { FieldError } from "./field-error"
 import { registerSchema } from "@/lib/validators/auth"
 import { quickCheckEmail } from "@/lib/validators/email"
 import { zodFieldValidator } from "@/lib/forms/zod-validators"
+import { Eye, EyeOff } from "lucide-react"
 
 interface ApiResponse {
   ok: boolean
@@ -20,6 +21,7 @@ export function RegisterForm() {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
   const [emailHint, setEmailHint] = useState<string | null>(null)
+  const [visible, setVisible] = useState(false)
 
   const form = useForm({
     defaultValues: { name: "", email: "", password: "", website: "" },
@@ -47,8 +49,7 @@ export function RegisterForm() {
         }
         const map: Record<string, string> = {
           EMAIL_TAKEN: "Email sudah terdaftar.",
-          EMAIL_DISPOSABLE:
-            "Mohon gunakan email pribadi atau kantor, bukan email sementara.",
+          EMAIL_DISPOSABLE: "Mohon gunakan email pribadi atau kantor, bukan email sementara.",
           EMAIL_INVALID: "Format email tidak valid.",
           EMAIL_TYPO: "Sepertinya ada salah ketik pada email.",
           EMAIL_NO_MX: "Domain email tidak dapat menerima email.",
@@ -168,17 +169,28 @@ export function RegisterForm() {
             <label htmlFor={field.name} className="sr-only">
               Password
             </label>
-            <Input
-              id={field.name}
-              name={field.name}
-              type="password"
-              placeholder="Password (minimal 8 karakter)"
-              autoComplete="new-password"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              required
-            />
+            <div className="relative flex items-center">
+              <Input
+                id={field.name}
+                name={field.name}
+                type={visible ? "text" : "password"}
+                placeholder="Password (minimal 8 karakter)"
+                autoComplete="new-password"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => setVisible((prev) => !prev)}
+                className="absolute right-3 top-4 text-muted-foreground hover:text-foreground"
+                aria-label={visible ? "Sembunyikan password" : "Tampilkan password"}
+              >
+                {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             <FieldError message={field.state.meta.errors[0] ?? null} />
             <p className="mt-1.5 text-xs text-stone-500">
               Minimal 8 karakter, mengandung huruf dan angka.

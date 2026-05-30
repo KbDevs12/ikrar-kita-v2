@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { FieldError } from "./field-error"
 import { loginSchema } from "@/lib/validators/auth"
 import { zodFieldValidator } from "@/lib/forms/zod-validators"
+import { Eye, EyeOff } from "lucide-react"
 
 interface LoginFormProps {
   redirectTo?: string
@@ -22,6 +23,7 @@ interface ApiResponse {
 export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [visible, setVisible] = useState(false)
 
   const form = useForm({
     defaultValues: { email: "", password: "" },
@@ -103,18 +105,29 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
             <label htmlFor={field.name} className="sr-only">
               Password
             </label>
-            <Input
-              id={field.name}
-              name={field.name}
-              type="password"
-              placeholder="Password"
-              autoComplete="current-password"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              aria-invalid={field.state.meta.errors.length > 0}
-              required
-            />
+            <div className="relative flex items-center">
+              <Input
+                id={field.name}
+                name={field.name}
+                type={visible ? "text" : "password"}
+                placeholder="Password"
+                autoComplete="current-password"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                aria-invalid={field.state.meta.errors.length > 0}
+                required
+              />
+
+              <button
+                type="button"
+                onClick={() => setVisible((prev) => !prev)}
+                className="absolute right-3 top-4 text-muted-foreground hover:text-foreground"
+                aria-label={visible ? "Sembunyikan password" : "Tampilkan password"}
+              >
+                {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             <FieldError message={field.state.meta.errors[0] ?? null} />
           </div>
         )}
