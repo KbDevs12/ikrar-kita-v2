@@ -6,6 +6,9 @@ import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
+import { TimePicker } from "@/components/ui/time-picker"
+import { LocationPicker } from "@/components/forms/location-picker"
 import { FieldError } from "./field-error"
 import {
   invitationCreateSchema,
@@ -84,6 +87,20 @@ const DEFAULT_VALUES: BuilderValues = {
   metaTitle: "",
   metaDescription: "",
   openingQuote: "",
+}
+
+/**
+ * Returns true when the given ISO date string falls before the start of today
+ * (local time). Empty/invalid values are treated as "not in the past" so the
+ * required-field validator owns that message instead.
+ */
+function isBeforeToday(value: string): boolean {
+  if (!value) return false
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return date < today
 }
 
 const STEPS = [
@@ -289,74 +306,121 @@ function StepEvent({ form }: StepProps) {
   return (
     <section>
       <header className="mb-6">
-        <h2 className="font-display text-2xl">Tanggal & jadwal</h2>
+        <h2 className="font-display text-2xl">Tanggal &amp; jadwal</h2>
         <p className="text-sm text-muted-foreground">
           Tambahkan satu atau beberapa rangkaian acara.
         </p>
       </header>
 
       <FieldText form={form} name="title" label="Judul undangan (opsional)" />
-      <FieldText
-        form={form}
-        name="eventDate"
-        label="Tanggal acara utama"
-        type="datetime-local"
-        required
-      />
 
-      <form.Field name="schedule" mode="array">
-        {(field) => (
-          <div className="mt-6 space-y-4">
-            {field.state.value.map((_, i) => (
-              <div
-                key={i}
-                className="rounded-lg border border-border bg-muted/30 p-4"
-              >
-                <FieldText
-                  form={form}
-                  name={`schedule[${i}].label`}
-                  label="Nama rangkaian"
+      <form.Field name="eventDate">
+        {(field) => {
+          const value = field.state.value
+          const past = isBeforeToday(value)
+          return (
+            <div className="mt-3">
+              <Label>
+                Tanggal acara utama <span className="text-destructive">*</span>
+              </Label>
+              <div className="mt-1.5">
+                <DatePicker
+                  value={value}
+                  onChange={(next) => field.handleChange(next)}
+                  minDate={new Date().toISOString()}
+                  placeholder="Pilih tanggal acara"
                 />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FieldText
-                    form={form}
-                    name={`schedule[${i}].startsAt`}
-                    label="Mulai"
-                    type="datetime-local"
-                  />
-                  <FieldText
-                    form={form}
-                    name={`schedule[${i}].endsAt`}
-                    label="Selesai (opsional)"
-                    type="datetime-local"
-                  />
-                </div>
-                <FieldText form={form} name={`schedule[${i}].notes`} label="Catatan (opsional)" />
+              </div>
+              {past ? (
+                <p className="mt-1.5 text-xs text-destructive" role="alert">
+                  Tanggal acara tidak boleh di masa lalu
+                </p>
+              ) : (
+                <FieldError message={field.state.meta.errors[0] ?? null} />
+              )}
+            </div>
+          )
+        }}
+      </form.Field>
+
+      <form.Subscribe selector={(s) => s.values.eventDate}>
+        {(eventDate) => (
+          <form.Field name="schedule" mode="array">
+            {(field) => (
+              <div className="mt-6 space-y-4">
+                {field.state.value.map((item, i) => {
+                  const endInvalid =
+                    item.endsAt && item.startsAt
+                      ? new Date(item.endsAt) <= new Date(item.startsAt)
+                      : false
+                  return (
+                    <div key={i} className="rounded-lg border border-border bg-muted/30 p-4">
+                      <FieldText form={form} name={`schedule[${i}].label`} label="Nama rangkaian" />
+                      <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <Label>Jam mulai</Label>
+                          <div className="mt-1.5">
+                            <form.Field name={`schedule[${i}].startsAt` as never}>
+                              {(sub) => (
+                                <TimePicker
+                                  value={(sub.state.value as string) ?? ""}
+                                  dateValue={eventDate}
+                                  onChange={(val) => sub.handleChange(val as never)}
+                                  placeholder="Jam mulai"
+                                />
+                              )}
+                            </form.Field>
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Jam selesai (opsional)</Label>
+                          <div className="mt-1.5">
+                            <form.Field name={`schedule[${i}].endsAt` as never}>
+                              {(sub) => (
+                                <TimePicker
+                                  value={(sub.state.value as string) ?? ""}
+                                  dateValue={eventDate}
+                                  minTime={item.startsAt || undefined}
+                                  onChange={(val) => sub.handleChange(val as never)}
+                                  placeholder="Jam selesai (opsional)"
+                                />
+                              )}
+                            </form.Field>
+                          </div>
+                          {endInvalid ? (
+                            <p className="mt-1.5 text-xs text-destructive" role="alert">
+                              Jam selesai harus setelah jam mulai
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                      <FieldText form={form} name={`schedule[${i}].notes`} label="Catatan (opsional)" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="mt-1 text-destructive"
+                        onClick={() => field.removeValue(i)}
+                        disabled={field.state.value.length <= 1}
+                      >
+                        Hapus rangkaian
+                      </Button>
+                    </div>
+                  )
+                })}
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="mt-1 text-destructive"
-                  onClick={() => field.removeValue(i)}
-                  disabled={field.state.value.length <= 1}
+                  onClick={() => field.pushValue({ label: "", startsAt: "", endsAt: "", notes: "" })}
                 >
-                  Hapus rangkaian
+                  + Tambah rangkaian
                 </Button>
               </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                field.pushValue({ label: "", startsAt: "", endsAt: "", notes: "" })
-              }
-            >
-              + Tambah rangkaian
-            </Button>
-          </div>
+            )}
+          </form.Field>
         )}
-      </form.Field>
+      </form.Subscribe>
     </section>
   )
 }
@@ -373,10 +437,30 @@ function StepLocation({ form }: StepProps) {
 
       <FieldText form={form} name="venueName" label="Nama lokasi" required />
       <FieldTextarea form={form} name="venueAddress" label="Alamat lengkap" rows={3} required />
-      <FieldText form={form} name="mapsUrl" label="URL Google Maps (opsional)" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FieldNumber form={form} name="latitude" label="Latitude (opsional)" step={0.000001} />
-        <FieldNumber form={form} name="longitude" label="Longitude (opsional)" step={0.000001} />
+
+      <div className="mt-4">
+        <Label>Titik lokasi di peta</Label>
+        <form.Subscribe
+          selector={(s) =>
+            [s.values.mapsUrl, s.values.latitude, s.values.longitude, s.values.venueAddress] as const
+          }
+        >
+          {([mapsUrl, latitude, longitude, venueAddress]) => (
+            <LocationPicker
+              mapsUrl={mapsUrl ?? ""}
+              latitude={latitude}
+              longitude={longitude}
+              venueAddress={venueAddress ?? ""}
+              onChange={(patch) => {
+                if (patch.mapsUrl !== undefined) form.setFieldValue("mapsUrl", patch.mapsUrl)
+                if (patch.latitude !== undefined) form.setFieldValue("latitude", patch.latitude)
+                if (patch.longitude !== undefined) form.setFieldValue("longitude", patch.longitude)
+                if (patch.venueAddress !== undefined)
+                  form.setFieldValue("venueAddress", patch.venueAddress)
+              }}
+            />
+          )}
+        </form.Subscribe>
       </div>
     </section>
   )
@@ -582,40 +666,6 @@ function FieldText({ form, name, label, required, type = "text", placeholder }: 
             onBlur={field.handleBlur}
             onChange={(e) => field.handleChange(e.target.value as never)}
             required={required}
-          />
-          <FieldError message={field.state.meta.errors[0] ?? null} />
-        </div>
-      )}
-    </form.Field>
-  )
-}
-
-function FieldNumber({
-  form,
-  name,
-  label,
-  step,
-}: {
-  form: ReturnType<typeof useForm<BuilderValues>> // eslint-disable-line @typescript-eslint/no-explicit-any
-  name: string
-  label: string
-  step?: number
-}) {
-  return (
-    <form.Field name={name as never}>
-      {(field) => (
-        <div className="mt-3">
-          <Label htmlFor={field.name}>{label}</Label>
-          <Input
-            id={field.name}
-            type="number"
-            step={step}
-            value={(field.state.value as number | undefined) ?? ""}
-            onBlur={field.handleBlur}
-            onChange={(e) => {
-              const v = e.target.value
-              field.handleChange((v === "" ? undefined : Number(v)) as never)
-            }}
           />
           <FieldError message={field.state.meta.errors[0] ?? null} />
         </div>
