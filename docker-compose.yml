@@ -11,6 +11,7 @@ name: ikrar-kita
 services:
   postgres:
     image: postgres:16-alpine
+    mem_limit: 512m
     container_name: ikrar-postgres
     restart: unless-stopped
     environment:
@@ -35,6 +36,7 @@ services:
     image: redis:7-alpine
     container_name: ikrar-redis
     restart: unless-stopped
+    mem_limit: 256m
     # Bind to all in-network only; not exposed to host by default in production.
     command:
       - redis-server
@@ -59,6 +61,7 @@ services:
 
   minio:
     image: minio/minio:latest
+    mem_limit: 256m
     container_name: ikrar-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
