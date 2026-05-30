@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { FieldError } from "./field-error"
 import { registerSchema } from "@/lib/validators/auth"
 import { quickCheckEmail } from "@/lib/validators/email"
@@ -48,7 +47,8 @@ export function RegisterForm() {
         }
         const map: Record<string, string> = {
           EMAIL_TAKEN: "Email sudah terdaftar.",
-          EMAIL_DISPOSABLE: "Mohon gunakan email pribadi atau kantor, bukan email sementara.",
+          EMAIL_DISPOSABLE:
+            "Mohon gunakan email pribadi atau kantor, bukan email sementara.",
           EMAIL_INVALID: "Format email tidak valid.",
           EMAIL_TYPO: "Sepertinya ada salah ketik pada email.",
           EMAIL_NO_MX: "Domain email tidak dapat menerima email.",
@@ -70,10 +70,9 @@ export function RegisterForm() {
         e.stopPropagation()
         form.handleSubmit()
       }}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
-      {/* Honeypot - hidden from real users via aria + tabIndex + visually-hidden */}
       <form.Field name="website">
         {(field) => (
           <input
@@ -94,10 +93,13 @@ export function RegisterForm() {
       >
         {(field) => (
           <div>
-            <Label htmlFor={field.name}>Nama lengkap</Label>
+            <label htmlFor={field.name} className="sr-only">
+              Nama lengkap
+            </label>
             <Input
               id={field.name}
               name={field.name}
+              placeholder="Nama lengkap"
               autoComplete="name"
               autoFocus
               value={field.state.value}
@@ -115,7 +117,6 @@ export function RegisterForm() {
         validators={{
           onChange: zodFieldValidator(registerSchema.shape.email),
           onBlur: ({ value }) => {
-            // Side-effect: surface a friendly typo / disposable hint
             if (!value) {
               setEmailHint(null)
               return undefined
@@ -136,11 +137,14 @@ export function RegisterForm() {
       >
         {(field) => (
           <div>
-            <Label htmlFor={field.name}>Email</Label>
+            <label htmlFor={field.name} className="sr-only">
+              Email
+            </label>
             <Input
               id={field.name}
               name={field.name}
               type="email"
+              placeholder="Email"
               autoComplete="email"
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -149,7 +153,7 @@ export function RegisterForm() {
             />
             <FieldError message={field.state.meta.errors[0] ?? null} />
             {emailHint && !field.state.meta.errors[0] ? (
-              <p className="mt-1.5 text-xs text-muted-foreground">{emailHint}</p>
+              <p className="mt-1.5 text-xs text-stone-500">{emailHint}</p>
             ) : null}
           </div>
         )}
@@ -161,11 +165,14 @@ export function RegisterForm() {
       >
         {(field) => (
           <div>
-            <Label htmlFor={field.name}>Password</Label>
+            <label htmlFor={field.name} className="sr-only">
+              Password
+            </label>
             <Input
               id={field.name}
               name={field.name}
               type="password"
+              placeholder="Password (minimal 8 karakter)"
               autoComplete="new-password"
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -173,7 +180,7 @@ export function RegisterForm() {
               required
             />
             <FieldError message={field.state.meta.errors[0] ?? null} />
-            <p className="mt-1.5 text-xs text-muted-foreground">
+            <p className="mt-1.5 text-xs text-stone-500">
               Minimal 8 karakter, mengandung huruf dan angka.
             </p>
           </div>
@@ -182,7 +189,7 @@ export function RegisterForm() {
 
       {serverError ? (
         <p
-          className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
           role="alert"
         >
           {serverError}
@@ -192,7 +199,7 @@ export function RegisterForm() {
       <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
         {([canSubmit, isSubmitting]) => (
           <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? "Mendaftarkan..." : "Buat akun"}
+            {isSubmitting ? "Membuat akun…" : "Buat akun"}
           </Button>
         )}
       </form.Subscribe>

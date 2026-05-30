@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { useForm } from "@tanstack/react-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { FieldError } from "./field-error"
 import { loginSchema } from "@/lib/validators/auth"
 import { zodFieldValidator } from "@/lib/forms/zod-validators"
@@ -28,9 +27,6 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
     defaultValues: { email: "", password: "" },
     onSubmit: async ({ value }) => {
       setServerError(null)
-
-      // Re-validate locally before sending - guards against the user
-      // bypassing field validation by submitting via Enter on an empty field.
       const parsed = loginSchema.safeParse(value)
       if (!parsed.success) {
         setServerError(parsed.error.issues[0]?.message ?? "Periksa kembali isian Anda.")
@@ -68,7 +64,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
         e.stopPropagation()
         form.handleSubmit()
       }}
-      className="space-y-5"
+      className="space-y-4"
       noValidate
     >
       <form.Field
@@ -77,11 +73,14 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
       >
         {(field) => (
           <div>
-            <Label htmlFor={field.name}>Email</Label>
+            <label htmlFor={field.name} className="sr-only">
+              Email
+            </label>
             <Input
               id={field.name}
               name={field.name}
               type="email"
+              placeholder="Email"
               autoComplete="email"
               autoFocus
               value={field.state.value}
@@ -101,13 +100,14 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
       >
         {(field) => (
           <div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor={field.name}>Password</Label>
-            </div>
+            <label htmlFor={field.name} className="sr-only">
+              Password
+            </label>
             <Input
               id={field.name}
               name={field.name}
               type="password"
+              placeholder="Password"
               autoComplete="current-password"
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -121,7 +121,10 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
       </form.Field>
 
       {serverError ? (
-        <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">
+        <p
+          className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700"
+          role="alert"
+        >
           {serverError}
         </p>
       ) : null}
@@ -129,7 +132,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
       <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
         {([canSubmit, isSubmitting]) => (
           <Button type="submit" className="w-full" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? "Memproses..." : "Masuk"}
+            {isSubmitting ? "Memproses…" : "Masuk"}
           </Button>
         )}
       </form.Subscribe>
