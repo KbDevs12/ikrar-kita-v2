@@ -12,7 +12,11 @@
 
 generator client {
   provider = "prisma-client-js"
+<<<<<<< HEAD
   output = "../node_modules/.prisma/client"
+=======
+  output = "../src/generated/prisma"
+>>>>>>> origin/fix/map-container-and-new-templates
 }
 
 datasource db {

@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest"
-import {
-  TEMPLATE_IDS,
-  INVITATION_TEMPLATES,
-} from "@/lib/constants/invitation-templates"
+import { TEMPLATE_IDS, INVITATION_TEMPLATES } from "@/lib/constants/invitation-templates"
 import { getTemplateComponent } from "@/components/invitation/templates/registry"
 
 /**
@@ -28,7 +25,7 @@ describe("template registry", () => {
       seen.add(Component)
     }
     expect(seen.size).toBe(TEMPLATE_IDS.length)
-    expect(seen.size).toBe(10)
+    expect(seen.size).toBe(30)
   })
 
   it("falls back to classic-elegant for unknown ids", () => {
@@ -37,7 +34,7 @@ describe("template registry", () => {
     expect(Unknown).toBe(Classic)
   })
 
-  it("the spec metadata has 10 templates", () => {
-    expect(INVITATION_TEMPLATES).toHaveLength(10)
+  it("the spec metadata has 30 templates", () => {
+    expect(INVITATION_TEMPLATES).toHaveLength(30)
   })
 })

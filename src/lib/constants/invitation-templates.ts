@@ -1,12 +1,12 @@
 /**
- * Registry of the 10 invitation templates.
+ * Registry of the 30 invitation templates.
  *
  * Each entry describes the visual identity that the React component
  * implementation must respect. The actual templates live under
- * src/components/invitation/templates/<id>/.
+ * src/components/invitation/templates/<id>.tsx.
  *
  * Tests assert that this registry stays in sync with the on-disk components
- * and that all 10 templates exist.
+ * and that all templates exist.
  */
 
 export type TemplateId =
@@ -20,6 +20,26 @@ export type TemplateId =
   | "dark-romance"
   | "floral-watercolor"
   | "cinematic-story"
+  | "javanese-royal"
+  | "sundanese-nature"
+  | "balinese-temple"
+  | "minang-adat"
+  | "betawi-festive"
+  | "spring-garden"
+  | "autumn-warmth"
+  | "beach-sunset"
+  | "nordic-winter"
+  | "art-deco"
+  | "bohemian-dream"
+  | "waterfront-blue"
+  | "royal-purple"
+  | "cherry-blossom"
+  | "desert-rose"
+  | "vintage-lace"
+  | "tropical-paradise"
+  | "celestial-night"
+  | "marble-luxe"
+  | "folk-art"
 
 export interface InvitationTemplate {
   id: TemplateId
@@ -27,7 +47,17 @@ export interface InvitationTemplate {
   shortDescription: string
   defaultPrimaryColor: string
   vibe: string
-  category: "formal" | "modern" | "outdoor" | "premium" | "soft" | "cultural" | "religious" | "moody" | "feminine" | "narrative"
+  category:
+    | "formal"
+    | "modern"
+    | "outdoor"
+    | "premium"
+    | "soft"
+    | "cultural"
+    | "religious"
+    | "moody"
+    | "feminine"
+    | "narrative"
 }
 
 export const INVITATION_TEMPLATES: readonly InvitationTemplate[] = [
@@ -110,6 +140,168 @@ export const INVITATION_TEMPLATES: readonly InvitationTemplate[] = [
     defaultPrimaryColor: "#0e0c08",
     vibe: "story-led",
     category: "narrative",
+  },
+  {
+    id: "javanese-royal",
+    name: "Javanese Royal",
+    shortDescription: "Coklat keraton, emas, dan motif parang rusak tipis — keagungan Jawa modern.",
+    defaultPrimaryColor: "#c8a35a",
+    vibe: "regal-heritage",
+    category: "cultural",
+  },
+  {
+    id: "sundanese-nature",
+    name: "Sundanese Nature",
+    shortDescription: "Hijau bambu dan terracotta dengan ilustrasi daun hanjuang yang tenang.",
+    defaultPrimaryColor: "#4a6741",
+    vibe: "calm-botanical",
+    category: "cultural",
+  },
+  {
+    id: "balinese-temple",
+    name: "Balinese Temple",
+    shortDescription: "Oranye hangat, ornamen pura, dan bunga kamboja yang spiritual.",
+    defaultPrimaryColor: "#d4631a",
+    vibe: "warm-spiritual",
+    category: "cultural",
+  },
+  {
+    id: "minang-adat",
+    name: "Minang Adat",
+    shortDescription: "Merah dan emas dengan gonjong rumah gadang — adat Minangkabau yang kuat.",
+    defaultPrimaryColor: "#8b1a1a",
+    vibe: "bold-heritage",
+    category: "cultural",
+  },
+  {
+    id: "betawi-festive",
+    name: "Betawi Festive",
+    shortDescription: "Merah hijau emas meriah dengan siluet ondel-ondel khas Betawi.",
+    defaultPrimaryColor: "#c41e1e",
+    vibe: "festive-folk",
+    category: "cultural",
+  },
+  {
+    id: "spring-garden",
+    name: "Spring Garden",
+    shortDescription: "Sage dan blush dengan ilustrasi sakura dan tulip — segar dan feminin.",
+    defaultPrimaryColor: "#7a9e7e",
+    vibe: "fresh-feminine",
+    category: "feminine",
+  },
+  {
+    id: "autumn-warmth",
+    name: "Autumn Warmth",
+    shortDescription: "Burnt orange dan coklat dengan daun maple — kehangatan musim gugur.",
+    defaultPrimaryColor: "#c4622d",
+    vibe: "warm-intimate",
+    category: "outdoor",
+  },
+  {
+    id: "beach-sunset",
+    name: "Beach Sunset",
+    shortDescription: "Coral dan teal dengan siluet ombak — pernikahan pantai yang santai.",
+    defaultPrimaryColor: "#e8734a",
+    vibe: "breezy-tropical",
+    category: "outdoor",
+  },
+  {
+    id: "nordic-winter",
+    name: "Nordic Winter",
+    shortDescription: "Biru es, putih, dan kristal salju — minimalis Skandinavia yang bersih.",
+    defaultPrimaryColor: "#6b7b8b",
+    vibe: "minimal-cool",
+    category: "modern",
+  },
+  {
+    id: "art-deco",
+    name: "Art Deco",
+    shortDescription: "Emas dan hitam dengan garis geometri dan sinar matahari era 1920an.",
+    defaultPrimaryColor: "#c8a35a",
+    vibe: "gilded-deco",
+    category: "premium",
+  },
+  {
+    id: "bohemian-dream",
+    name: "Bohemian Dream",
+    shortDescription:
+      "Terracotta dan dusty rose dengan dreamcatcher dan bulan sabit, bebas dan artistik.",
+    defaultPrimaryColor: "#c4622d",
+    vibe: "boho-artistic",
+    category: "feminine",
+  },
+  {
+    id: "waterfront-blue",
+    name: "Waterfront Blue",
+    shortDescription: "Navy dan biru langit dengan gelombang laut halus — elegan tepi laut.",
+    defaultPrimaryColor: "#1a2a4a",
+    vibe: "nautical-elegant",
+    category: "modern",
+  },
+  {
+    id: "royal-purple",
+    name: "Royal Purple",
+    shortDescription: "Ungu tua dan emas dengan fleur-de-lis — kemewahan kerajaan Eropa.",
+    defaultPrimaryColor: "#4a1a6b",
+    vibe: "regal-luxe",
+    category: "premium",
+  },
+  {
+    id: "cherry-blossom",
+    name: "Cherry Blossom",
+    shortDescription: "Pink dan kayu dengan cabang sakura — romantis Jepang yang puitis.",
+    defaultPrimaryColor: "#c25e7a",
+    vibe: "poetic-soft",
+    category: "soft",
+  },
+  {
+    id: "desert-rose",
+    name: "Desert Rose",
+    shortDescription: "Terracotta dan dusty pink dengan kaktus — pernikahan gurun yang earthy.",
+    defaultPrimaryColor: "#c4622d",
+    vibe: "earthy-warm",
+    category: "outdoor",
+  },
+  {
+    id: "vintage-lace",
+    name: "Vintage Lace",
+    shortDescription:
+      "Gading dan blush dengan pola renda — vintage romantic seperti undangan antik.",
+    defaultPrimaryColor: "#b08d57",
+    vibe: "vintage-romantic",
+    category: "formal",
+  },
+  {
+    id: "tropical-paradise",
+    name: "Tropical Paradise",
+    shortDescription: "Hijau tropis dan kuning cerah dengan daun monstera — ceria dan berwarna.",
+    defaultPrimaryColor: "#2a6b4a",
+    vibe: "vibrant-tropical",
+    category: "outdoor",
+  },
+  {
+    id: "celestial-night",
+    name: "Celestial Night",
+    shortDescription: "Midnight dan emas dengan bintang dan konstelasi — malam yang magis.",
+    defaultPrimaryColor: "#c8a35a",
+    vibe: "magical-moody",
+    category: "moody",
+  },
+  {
+    id: "marble-luxe",
+    name: "Marble Luxe",
+    shortDescription: "Marmer putih dengan venasi halus dan garis emas — kemewahan modern bersih.",
+    defaultPrimaryColor: "#c8a35a",
+    vibe: "clean-luxe",
+    category: "premium",
+  },
+  {
+    id: "folk-art",
+    name: "Folk Art",
+    shortDescription: "Merah biru kuning dengan ilustrasi bunga dan burung bergaya Skandinavia.",
+    defaultPrimaryColor: "#c41e1e",
+    vibe: "playful-handcrafted",
+    category: "feminine",
   },
 ] as const
 

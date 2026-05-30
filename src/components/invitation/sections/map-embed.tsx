@@ -2,7 +2,9 @@
 
 import { useMemo } from "react"
 import dynamic from "next/dynamic"
-import "leaflet/dist/leaflet.css"
+// NOTE: `leaflet/dist/leaflet.css` is intentionally imported inside
+// `map-embed-leaflet.tsx` (the `ssr: false` client chunk) so it never loads
+// during a server render pass.
 
 interface MapEmbedProps {
   /** Latitude on the invitation row, may be null for older drafts. */
@@ -24,9 +26,7 @@ interface MapEmbedProps {
 const RLeaflet = dynamic(async () => (await import("./map-embed-leaflet")).LeafletMap, {
   ssr: false,
   loading: () => (
-    <div className="grid h-full place-items-center text-xs text-stone-500">
-      Memuat peta…
-    </div>
+    <div className="grid h-full place-items-center text-xs text-stone-500">Memuat peta…</div>
   ),
 })
 
@@ -58,13 +58,7 @@ function extractLatLng(url?: string): [number, number] | null {
  * Templates wrap this in their own framing (rounded card, gilt frame, etc.)
  * so the box itself stays visually unopinionated.
  */
-export function MapEmbed({
-  latitude,
-  longitude,
-  mapsUrl,
-  venueName,
-  className,
-}: MapEmbedProps) {
+export function MapEmbed({ latitude, longitude, mapsUrl, venueName, className }: MapEmbedProps) {
   const coords = useMemo<[number, number] | null>(() => {
     if (typeof latitude === "number" && typeof longitude === "number") {
       return [latitude, longitude]
@@ -81,8 +75,7 @@ export function MapEmbed({
         }
       >
         <div className="grid h-full place-items-center px-6 text-center">
-          Lokasi belum disertakan koordinat. Silakan buka tautan Google Maps
-          di tombol bawah.
+          Lokasi belum disertakan koordinat. Silakan buka tautan Google Maps di tombol bawah.
         </div>
       </div>
     )
@@ -91,13 +84,13 @@ export function MapEmbed({
   return (
     <div
       className={
-        className ??
-        "aspect-[4/3] w-full overflow-hidden rounded-2xl border border-stone-200"
+        className ?? "aspect-[4/3] w-full overflow-hidden rounded-2xl border border-stone-200"
       }
       role="img"
       aria-label={venueName ? `Peta lokasi ${venueName}` : "Peta lokasi acara"}
     >
       <RLeaflet
+        key={`map-${coords[0]}-${coords[1]}`}
         latitude={coords[0]}
         longitude={coords[1]}
         venueName={venueName ?? "Lokasi acara"}
