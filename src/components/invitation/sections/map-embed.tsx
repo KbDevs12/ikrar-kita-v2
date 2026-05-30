@@ -2,7 +2,9 @@
 
 import { useMemo } from "react"
 import dynamic from "next/dynamic"
-import "leaflet/dist/leaflet.css"
+// NOTE: `leaflet/dist/leaflet.css` is intentionally imported inside
+// `map-embed-leaflet.tsx` (the `ssr: false` client chunk) so it never loads
+// during a server render pass.
 
 interface MapEmbedProps {
   /** Latitude on the invitation row, may be null for older drafts. */
@@ -98,6 +100,7 @@ export function MapEmbed({
       aria-label={venueName ? `Peta lokasi ${venueName}` : "Peta lokasi acara"}
     >
       <RLeaflet
+        key={`map-${coords[0]}-${coords[1]}`}
         latitude={coords[0]}
         longitude={coords[1]}
         venueName={venueName ?? "Lokasi acara"}
