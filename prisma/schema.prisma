@@ -11,13 +11,11 @@
 //     Postgres container. We do not configure a separate pgbouncer here.
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
@@ -98,25 +96,25 @@ enum EmailEventStatus {
 // ─── Models ──────────────────────────────────────────────────────────────────
 
 model User {
-  id                       String                  @id @default(cuid())
-  name                     String
-  email                    String                  @unique
-  passwordHash             String
-  role                     Role                    @default(USER)
-  emailVerifiedAt          DateTime?
-  emailVerificationStatus  EmailVerificationStatus @default(UNVERIFIED)
-  createdAt                DateTime                @default(now())
-  updatedAt                DateTime                @updatedAt
+  id                      String                  @id @default(cuid())
+  name                    String
+  email                   String                  @unique
+  passwordHash            String
+  role                    Role                    @default(USER)
+  emailVerifiedAt         DateTime?
+  emailVerificationStatus EmailVerificationStatus @default(UNVERIFIED)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
 
-  sessions                 Session[]
-  invitations              Invitation[]
-  subscriptions            Subscription[]
-  invoices                 Invoice[]
-  emailVerificationTokens  EmailVerificationToken[]
-  emailEvents              EmailEvent[]
-  auditLogs                AuditLog[]              @relation("AuditUser")
-  adminAuditLogs           AuditLog[]              @relation("AuditAdmin")
-  approvedInvoices         Invoice[]               @relation("InvoiceApprovedBy")
+  sessions                Session[]
+  invitations             Invitation[]
+  subscriptions           Subscription[]
+  invoices                Invoice[]
+  emailVerificationTokens EmailVerificationToken[]
+  emailEvents             EmailEvent[]
+  auditLogs               AuditLog[]               @relation("AuditUser")
+  adminAuditLogs          AuditLog[]               @relation("AuditAdmin")
+  approvedInvoices        Invoice[]                @relation("InvoiceApprovedBy")
 
   @@index([role])
   @@index([emailVerificationStatus])
@@ -179,9 +177,9 @@ model Plan {
   id              String   @id @default(cuid())
   code            PlanCode @unique
   name            String
-  price           Int      // amount in IDR (no decimals)
-  durationDays    Int      // 30 for all current plans
-  invitationLimit Int?     // null = unlimited (RESELLER)
+  price           Int // amount in IDR (no decimals)
+  durationDays    Int // 30 for all current plans
+  invitationLimit Int? // null = unlimited (RESELLER)
   description     String?
   isActive        Boolean  @default(true)
   sortOrder       Int      @default(0)
@@ -211,39 +209,39 @@ model Subscription {
 }
 
 model Invoice {
-  id                    String          @id @default(cuid())
-  userId                String
-  planId                String
-  amount                Int
-  status                InvoiceStatus   @default(PENDING)
-  paymentProvider       PaymentProvider @default(TRIPAY)
+  id              String          @id @default(cuid())
+  userId          String
+  planId          String
+  amount          Int
+  status          InvoiceStatus   @default(PENDING)
+  paymentProvider PaymentProvider @default(TRIPAY)
 
   // Tripay specific - all nullable until checkout completes
   paymentMethodCode     String?
   paymentMethodName     String?
-  merchantRef           String          @unique
-  tripayReference       String?         @unique
+  merchantRef           String  @unique
+  tripayReference       String? @unique
   tripayCheckoutUrl     String?
   tripayPayCode         String?
   tripayQrUrl           String?
   tripayRawResponse     Json?
   tripayCallbackPayload Json?
 
-  expiredAt             DateTime?
-  paidAt                DateTime?
-  approvedAt            DateTime?
-  approvedByAdminId     String?
-  manualApprovalNote    String?
-  processedAt           DateTime?
+  expiredAt          DateTime?
+  paidAt             DateTime?
+  approvedAt         DateTime?
+  approvedByAdminId  String?
+  manualApprovalNote String?
+  processedAt        DateTime?
 
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan             Plan           @relation(fields: [planId], references: [id])
-  approvedByAdmin  User?          @relation("InvoiceApprovedBy", fields: [approvedByAdminId], references: [id])
-  paymentEvents    PaymentEvent[]
-  emailEvents      EmailEvent[]
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            Plan           @relation(fields: [planId], references: [id])
+  approvedByAdmin User?          @relation("InvoiceApprovedBy", fields: [approvedByAdminId], references: [id])
+  paymentEvents   PaymentEvent[]
+  emailEvents     EmailEvent[]
 
   @@index([userId])
   @@index([status])
@@ -255,8 +253,8 @@ model PaymentEvent {
   id               String          @id @default(cuid())
   invoiceId        String?
   provider         PaymentProvider
-  eventType        String          // e.g. "payment_status", "callback_invalid"
-  status           String          // raw provider status (PAID, FAILED, etc.)
+  eventType        String // e.g. "payment_status", "callback_invalid"
+  status           String // raw provider status (PAID, FAILED, etc.)
   rawPayload       Json
   signature        String?
   isValidSignature Boolean         @default(false)
@@ -270,37 +268,37 @@ model PaymentEvent {
 }
 
 model Invitation {
-  id            String           @id @default(cuid())
-  userId        String
-  slug          String           @unique
-  status        InvitationStatus @default(DRAFT)
-  title         String?
+  id     String           @id @default(cuid())
+  userId String
+  slug   String           @unique
+  status InvitationStatus @default(DRAFT)
+  title  String?
 
   // Couple
-  groomName     String
-  brideName     String
+  groomName String
+  brideName String
 
   // Event basics - kept on top-level columns for indexing/listing
-  eventDate     DateTime?
-  venueName     String?
-  venueAddress  String?
-  latitude      Float?
-  longitude     Float?
+  eventDate    DateTime?
+  venueName    String?
+  venueAddress String?
+  latitude     Float?
+  longitude    Float?
 
   // Visual
-  theme         String           @default("classic-elegant")
+  theme         String  @default("classic-elegant")
   primaryColor  String?
   coverImageUrl String?
   musicUrl      String?
 
   // Full content blob - parents, story, schedule, gifts, custom sections, etc.
   // Validated at the application layer with Zod (see lib/validators/invitation.ts).
-  content       Json             @default("{}")
+  content Json @default("{}")
 
-  publishedAt   DateTime?
-  archivedAt    DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  publishedAt DateTime?
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   media         InvitationMedia[]
@@ -320,7 +318,7 @@ model InvitationMedia {
   url          String
   filename     String
   mimeType     String
-  size         Int                 // bytes
+  size         Int // bytes
   width        Int?
   height       Int?
   durationMs   Int?
@@ -339,7 +337,7 @@ model Rsvp {
   attendanceStatus RsvpAttendance
   guestCount       Int            @default(1)
   message          String?
-  ipHash           String?        // sha256(ip + salt) for soft rate limit / dedupe
+  ipHash           String? // sha256(ip + salt) for soft rate limit / dedupe
   createdAt        DateTime       @default(now())
 
   invitation Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
@@ -380,15 +378,15 @@ model AuditLog {
   id         String   @id @default(cuid())
   userId     String?
   adminId    String?
-  action     String   // e.g. "invitation.publish", "invoice.manual_approve"
-  entityType String   // e.g. "Invitation", "Invoice", "User"
+  action     String // e.g. "invitation.publish", "invoice.manual_approve"
+  entityType String // e.g. "Invitation", "Invoice", "User"
   entityId   String?
   metadata   Json?
   ipAddress  String?
   userAgent  String?
   createdAt  DateTime @default(now())
 
-  user  User? @relation("AuditUser",  fields: [userId],  references: [id], onDelete: SetNull)
+  user  User? @relation("AuditUser", fields: [userId], references: [id], onDelete: SetNull)
   admin User? @relation("AuditAdmin", fields: [adminId], references: [id], onDelete: SetNull)
 
   @@index([action])

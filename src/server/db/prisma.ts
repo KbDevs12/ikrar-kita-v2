@@ -6,6 +6,8 @@
  * fine because the module is imported once per process.
  */
 import { PrismaClient } from "@prisma/client"
+import { PrismaPg } from "@prisma/adapter-pg"
+import pg from "pg"
 
 declare global {
   // eslint-disable-next-line no-var
@@ -13,11 +15,11 @@ declare global {
 }
 
 function createClient(): PrismaClient {
+  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+  const adapter = new PrismaPg(pool)
   return new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "warn", "error"]
-        : ["warn", "error"],
+    adapter,
+    log: process.env.NODE_ENV === "development" ? ["query", "warn", "error"] : ["warn", "error"],
   })
 }
 
