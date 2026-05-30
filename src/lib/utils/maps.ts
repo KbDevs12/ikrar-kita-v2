@@ -87,3 +87,21 @@ export function parseLatLngFromMapsUrl(url: string): LatLng | null {
 
   return null
 }
+
+/**
+ * Build a safe "open in Google Maps" href. Prefers the user-pasted URL, then
+ * falls back to a coordinate query, then to a bare Maps link. Mirrors the
+ * helper used by the public invitation templates so the builder preview and
+ * the rendered invitation point at the same place.
+ */
+export function buildGoogleMapsHref(opts: {
+  latitude?: number | null
+  longitude?: number | null
+  mapsUrl?: string
+}): string {
+  if (opts.mapsUrl && opts.mapsUrl.trim().length > 0) return opts.mapsUrl
+  if (typeof opts.latitude === "number" && typeof opts.longitude === "number") {
+    return `https://www.google.com/maps?q=${opts.latitude},${opts.longitude}`
+  }
+  return "https://www.google.com/maps"
+}

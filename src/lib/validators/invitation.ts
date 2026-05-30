@@ -43,12 +43,37 @@ const isoDateTime = z.string().refine((v) => !Number.isNaN(Date.parse(v)), {
   message: "Tanggal tidak valid",
 })
 
-export const eventScheduleItemSchema = z.object({
-  label: z.string().trim().min(2).max(80),
-  startsAt: isoDateTime,
-  endsAt: isoDateTime.optional(),
-  notes: z.string().trim().max(500).optional(),
-})
+/**
+ * Event date must not be in the past. Compared against the start of today
+ * (local), so an event scheduled for today is still allowed. Kept in sync
+ * with the `minDate` floor enforced by the DatePicker in the builder UI.
+ */
+const eventDateSchema = isoDateTime.refine(
+  (val) => {
+    const date = new Date(val)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return date >= today
+  },
+  { message: "Tanggal acara tidak boleh di masa lalu" }
+)
+
+export const eventScheduleItemSchema = z
+  .object({
+    label: z.string().trim().min(2).max(80),
+    startsAt: isoDateTime,
+    // `endsAt` is optional. The builder emits an empty string for a not-yet
+    // chosen end time, so we accept "" as "absent" alongside `undefined`.
+    endsAt: isoDateTime.optional().or(z.literal("")),
+    notes: z.string().trim().max(500).optional(),
+  })
+  .refine(
+    (item) => {
+      if (!item.endsAt) return true // endsAt optional - skip when empty
+      return new Date(item.endsAt) > new Date(item.startsAt)
+    },
+    { message: "Jam selesai harus setelah jam mulai", path: ["endsAt"] }
+  )
 
 export type EventScheduleItem = z.infer<typeof eventScheduleItemSchema>
 
@@ -77,7 +102,7 @@ const coupleShape = {
 
 const eventShape = {
   title: z.string().trim().max(120).optional().or(z.literal("")),
-  eventDate: isoDateTime,
+  eventDate: eventDateSchema,
   schedule: z.array(eventScheduleItemSchema).min(1, "Minimal satu jadwal acara").max(10),
 } as const
 
@@ -122,13 +147,7 @@ export type StepCoupleInput = z.infer<typeof stepCoupleSchema>
 export const stepEventSchema = z.object(eventShape).superRefine((data, ctx) => {
   const eventTs = Date.parse(data.eventDate)
   for (const [i, item] of data.schedule.entries()) {
-    if (item.endsAt && Date.parse(item.endsAt) <= Date.parse(item.startsAt)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["schedule", i, "endsAt"],
-        message: "Waktu selesai harus setelah waktu mulai",
-      })
-    }
+    // endsAt-after-startsAt is enforced on the schedule item itself.
     if (Math.abs(Date.parse(item.startsAt) - eventTs) > 1000 * 60 * 60 * 24 * 30) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -168,13 +187,7 @@ export const invitationCreateSchema = z.object(fullShape).superRefine((data, ctx
   // Re-apply event cross-field validation at the document level too
   const eventTs = Date.parse(data.eventDate)
   for (const [i, item] of data.schedule.entries()) {
-    if (item.endsAt && Date.parse(item.endsAt) <= Date.parse(item.startsAt)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["schedule", i, "endsAt"],
-        message: "Waktu selesai harus setelah waktu mulai",
-      })
-    }
+    // endsAt-after-startsAt is enforced on the schedule item itself.
     if (Math.abs(Date.parse(item.startsAt) - eventTs) > 1000 * 60 * 60 * 24 * 30) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
