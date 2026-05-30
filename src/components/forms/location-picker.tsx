@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import { MapPin, Search, Loader2 } from "lucide-react"
-import "leaflet/dist/leaflet.css"
+
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -15,9 +15,7 @@ const LocationMapPreview = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="grid h-full place-items-center text-xs text-stone-500">
-        Memuat peta…
-      </div>
+      <div className="grid h-full place-items-center text-xs text-stone-500">Memuat peta…</div>
     ),
   }
 )
@@ -180,8 +178,8 @@ export function LocationPicker({
           </p>
         ) : (
           <p id="location-maps-help" className="mt-1.5 text-xs text-stone-500">
-            Buka lokasi di Google Maps, tekan Bagikan, salin tautannya, lalu
-            tempel di sini. Koordinat akan terisi otomatis.
+            Buka lokasi di Google Maps, tekan Bagikan, salin tautannya, lalu tempel di sini.
+            Koordinat akan terisi otomatis.
           </p>
         )}
       </div>
@@ -228,8 +226,7 @@ export function LocationPicker({
         {search.status === "done" ? (
           search.results.length === 0 ? (
             <p className="mt-2 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-500">
-              Alamat tidak ditemukan. Coba kata kunci lain atau tempel link
-              Google Maps di atas.
+              Alamat tidak ditemukan. Coba kata kunci lain atau tempel link Google Maps di atas.
             </p>
           ) : (
             <ul className="mt-2 overflow-hidden rounded-lg border border-rose-200">
@@ -280,11 +277,11 @@ export function LocationPicker({
           )}
         >
           {typeof latitude === "number" && typeof longitude === "number" ? (
-            <LocationMapPreview lat={latitude} lng={longitude} />
+            <LocationMapPreview key="location-map" lat={latitude} lng={longitude} />
           ) : (
             <p className="px-6 text-center text-xs text-stone-500">
-              Peta akan muncul di sini setelah koordinat terisi dari link
-              Google Maps atau hasil pencarian.
+              Peta akan muncul di sini setelah koordinat terisi dari link Google Maps atau hasil
+              pencarian.
             </p>
           )}
         </div>
