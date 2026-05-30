@@ -10,11 +10,16 @@
  *   - Schedule rendered in a "scroll" cartouche with rounded ends
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -69,9 +74,10 @@ export function TraditionalIndonesian({
 }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#7a2326"
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("traditional-indonesian")
 
   return (
-    <article
+    <article id="top"
       className="relative min-h-screen overflow-hidden text-[#3a1c12]"
       style={{ background: "linear-gradient(180deg, #f8efd9 0%, #f3e6c8 100%)" }}
     >
@@ -115,13 +121,11 @@ export function TraditionalIndonesian({
       </header>
 
       {/* Quote */}
-      {c.openingQuote ? (
-        <section className="relative z-10 mx-auto max-w-xl px-6 py-14 text-center">
-          <blockquote className="font-serif text-xl italic leading-snug text-[#3a1c12]/85 sm:text-2xl">
-            “{c.openingQuote}”
-          </blockquote>
-        </section>
-      ) : null}
+      <section className="relative z-10 mx-auto max-w-xl px-6 py-14 text-center">
+        <blockquote className="font-serif text-xl italic leading-snug text-[#3a1c12]/85 sm:text-2xl">
+          “{quote}”
+        </blockquote>
+      </section>
 
       {/* Couple */}
       <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
@@ -197,29 +201,52 @@ export function TraditionalIndonesian({
 
       {/* Map */}
       {invitation.venueName ? (
-        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16 text-center">
-          <h2 className="font-display text-3xl" style={{ color: accent }}>
+        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16">
+          <h2 className="text-center font-display text-3xl" style={{ color: accent }}>
             {invitation.venueName}
           </h2>
           {invitation.venueAddress ? (
-            <p className="mt-3 font-serif text-base italic">{invitation.venueAddress}</p>
+            <p className="mt-3 text-center font-serif text-base italic">
+              {invitation.venueAddress}
+            </p>
           ) : null}
-          {c.mapsUrl ||
-          (typeof invitation.latitude === "number" &&
-            typeof invitation.longitude === "number") ? (
+          <div className="mt-8">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[4/3] w-full overflow-hidden rounded-lg border"
+            />
+          </div>
+          <div className="mt-6 text-center">
             <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
+              href={buildGoogleMapsHref({
+                latitude: invitation.latitude,
+                longitude: invitation.longitude,
+                mapsUrl: c.mapsUrl,
+              })}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block rounded-full px-6 py-2.5 text-sm font-medium text-[#fbf3df]"
+              className="inline-block rounded-full px-6 py-2.5 text-sm font-medium text-[#fbf3df]"
               style={{ background: accent }}
             >
               Lihat lokasi
             </Link>
-          ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <section className="relative z-10 mx-auto max-w-4xl px-6 py-16">
+          <h2 className="text-center font-display text-3xl" style={{ color: accent }}>
+            Galeri
+          </h2>
+          <SongketDivider accent={accent} />
+          <div className="mt-10">
+            <Gallery urls={c.galleryUrls} variant="mosaic" />
+          </div>
         </section>
       ) : null}
 
@@ -301,7 +328,14 @@ export function TraditionalIndonesian({
         <p className="mt-6 font-display text-3xl" style={{ color: accent }}>
           {invitation.groomName} &amp; {invitation.brideName}
         </p>
+        <p className="mt-6 text-xs">
+          <a href="#top" className="text-[#3a1c12]/60 underline-offset-4 hover:text-[#3a1c12] hover:underline">
+            Kembali ke atas ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="light" />
     </article>
   )
 }

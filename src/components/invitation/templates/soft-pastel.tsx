@@ -9,11 +9,16 @@
  *   - Uses small floating cards that overlap softly
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -25,9 +30,10 @@ import { formatDateID } from "@/lib/utils"
 export function SoftPastel({ invitation, recipient }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#b65538"
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("soft-pastel")
 
   return (
-    <article className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#fdf6f3] via-[#fbeae5] to-[#f6e7ee] text-rose-900">
+    <article id="top" className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#fdf6f3] via-[#fbeae5] to-[#f6e7ee] text-rose-900">
       {/* Soft watercolour blobs - decorative only */}
       <div
         className="pointer-events-none absolute -left-24 top-12 h-72 w-72 rounded-full bg-rose-300/35 blur-3xl"
@@ -67,13 +73,11 @@ export function SoftPastel({ invitation, recipient }: InvitationTemplateProps) {
       </header>
 
       {/* Quote */}
-      {c.openingQuote ? (
-        <section className="relative z-10 mx-auto max-w-xl px-6 py-16 text-center">
-          <blockquote className="font-serif text-xl italic leading-snug text-rose-700 sm:text-2xl">
-            “{c.openingQuote}”
-          </blockquote>
-        </section>
-      ) : null}
+      <section className="relative z-10 mx-auto max-w-xl px-6 py-16 text-center">
+        <blockquote className="font-serif text-xl italic leading-snug text-rose-700 sm:text-2xl">
+          “{quote}”
+        </blockquote>
+      </section>
 
       {/* Couple - overlapping pastel cards */}
       <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
@@ -132,28 +136,46 @@ export function SoftPastel({ invitation, recipient }: InvitationTemplateProps) {
 
       {/* Map */}
       {invitation.venueName ? (
-        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16 text-center">
+        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16">
           <SoftHeading kicker="Lokasi Acara" title={invitation.venueName} />
           {invitation.venueAddress ? (
-            <p className="mt-3 font-serif text-base italic text-rose-700/80">
+            <p className="mt-3 text-center font-serif text-base italic text-rose-700/80">
               {invitation.venueAddress}
             </p>
           ) : null}
-          {(c.mapsUrl ||
-            (typeof invitation.latitude === "number" &&
-              typeof invitation.longitude === "number")) ? (
+          <div className="mt-8">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[4/3] w-full overflow-hidden rounded-3xl ring-1 ring-rose-200/60"
+            />
+          </div>
+          <div className="mt-6 text-center">
             <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
+              href={buildGoogleMapsHref({
+                latitude: invitation.latitude,
+                longitude: invitation.longitude,
+                mapsUrl: c.mapsUrl,
+              })}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block rounded-full bg-rose-700/90 px-5 py-2.5 text-sm text-rose-50 shadow-sm hover:bg-rose-800"
+              className="inline-block rounded-full bg-rose-700/90 px-5 py-2.5 text-sm text-rose-50 shadow-sm hover:bg-rose-800"
             >
               Buka di Google Maps
             </Link>
-          ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
+          <SoftHeading kicker="Galeri Manis" title="Catatan momen" />
+          <div className="mt-10">
+            <Gallery urls={c.galleryUrls} variant="polaroid" />
+          </div>
         </section>
       ) : null}
 
@@ -218,7 +240,14 @@ export function SoftPastel({ invitation, recipient }: InvitationTemplateProps) {
         <p className="mt-3 text-sm text-rose-700/70">
           Terima kasih atas doa dan kehadiran Anda.
         </p>
+        <p className="mt-6 text-xs">
+          <a href="#top" className="text-rose-700/60 underline-offset-4 hover:text-rose-900 hover:underline">
+            Kembali ke atas ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="light" />
     </article>
   )
 }

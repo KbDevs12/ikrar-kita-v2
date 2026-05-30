@@ -11,11 +11,16 @@
  *     instead of timeline or simple rows.
  */
 import Link from "next/link"
+import Image from "next/image"
 import {
   type InvitationContent,
   type InvitationTemplateProps,
+  getDefaultOpeningQuote,
   readContent,
 } from "./types"
+import { Gallery } from "../sections/gallery"
+import { MapEmbed, buildGoogleMapsHref } from "../sections/map-embed"
+import { BackToTop } from "../sections/back-to-top"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -56,9 +61,10 @@ function GiltRule({ wide = false }: { wide?: boolean }) {
 export function LuxuryGold({ invitation, recipient }: InvitationTemplateProps) {
   const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? GOLD
+  const quote = c.openingQuote?.trim() || getDefaultOpeningQuote("luxury-gold")
 
   return (
-    <article className="relative min-h-screen overflow-hidden bg-[#0e0c08] text-[#e9e0c9]">
+    <article id="top" className="relative min-h-screen overflow-hidden bg-[#0e0c08] text-[#e9e0c9]">
       {/* Vignette */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -122,19 +128,17 @@ export function LuxuryGold({ invitation, recipient }: InvitationTemplateProps) {
       </header>
 
       {/* Quote */}
-      {c.openingQuote ? (
-        <section className="relative z-10 mx-auto max-w-xl px-6 py-16 text-center">
-          <p
-            className="text-[10px] uppercase tracking-[0.4em]"
-            style={{ color: accent }}
-          >
-            Aforisme
-          </p>
-          <blockquote className="mt-5 font-serif text-2xl italic leading-snug text-[#e9e0c9]/90">
-            “{c.openingQuote}”
-          </blockquote>
-        </section>
-      ) : null}
+      <section className="relative z-10 mx-auto max-w-xl px-6 py-16 text-center">
+        <p
+          className="text-[10px] uppercase tracking-[0.4em]"
+          style={{ color: accent }}
+        >
+          Aforisme
+        </p>
+        <blockquote className="mt-5 font-serif text-2xl italic leading-snug text-[#e9e0c9]/90">
+          “{quote}”
+        </blockquote>
+      </section>
 
       {/* Couple - center-symmetric */}
       <section className="relative z-10 mx-auto max-w-3xl px-6 py-16">
@@ -232,35 +236,63 @@ export function LuxuryGold({ invitation, recipient }: InvitationTemplateProps) {
 
       {/* Map */}
       {invitation.venueName ? (
-        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16 text-center">
-          <p
-            className="text-[10px] uppercase tracking-[0.4em]"
-            style={{ color: accent }}
-          >
-            Venue
-          </p>
-          <h2 className="mt-3 font-display text-3xl">{invitation.venueName}</h2>
-          {invitation.venueAddress ? (
-            <p className="mt-3 font-serif text-base text-[#e9e0c9]/80">
-              {invitation.venueAddress}
+        <section className="relative z-10 mx-auto max-w-2xl px-6 py-16">
+          <header className="text-center">
+            <p
+              className="text-[10px] uppercase tracking-[0.4em]"
+              style={{ color: accent }}
+            >
+              Venue
             </p>
-          ) : null}
-          {c.mapsUrl ||
-          (typeof invitation.latitude === "number" &&
-            typeof invitation.longitude === "number") ? (
+            <h2 className="mt-3 font-display text-3xl">{invitation.venueName}</h2>
+            {invitation.venueAddress ? (
+              <p className="mt-3 font-serif text-base text-[#e9e0c9]/80">
+                {invitation.venueAddress}
+              </p>
+            ) : null}
+          </header>
+          <div className="mt-8">
+            <MapEmbed
+              latitude={invitation.latitude}
+              longitude={invitation.longitude}
+              mapsUrl={c.mapsUrl}
+              venueName={invitation.venueName}
+              className="aspect-[4/3] w-full overflow-hidden border"
+            />
+          </div>
+          <div className="mt-8 text-center">
             <Link
-              href={
-                c.mapsUrl ??
-                `https://www.google.com/maps?q=${invitation.latitude},${invitation.longitude}`
-              }
+              href={buildGoogleMapsHref({
+                latitude: invitation.latitude,
+                longitude: invitation.longitude,
+                mapsUrl: c.mapsUrl,
+              })}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-8 inline-flex items-center gap-2 border px-6 py-2.5 text-sm font-medium tracking-wider"
+              className="inline-flex items-center gap-2 border px-6 py-2.5 text-sm font-medium tracking-wider"
               style={{ borderColor: accent, color: accent }}
             >
               Buka di peta
             </Link>
-          ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {/* Gallery */}
+      {Array.isArray(c.galleryUrls) && c.galleryUrls.length > 0 ? (
+        <section className="relative z-10 mx-auto max-w-5xl px-6 py-16">
+          <header className="text-center">
+            <p
+              className="text-[10px] uppercase tracking-[0.4em]"
+              style={{ color: accent }}
+            >
+              Memoirs
+            </p>
+            <h2 className="mt-3 font-display text-3xl">Kenangan</h2>
+          </header>
+          <div className="mt-10">
+            <Gallery urls={c.galleryUrls} variant="cinema" />
+          </div>
         </section>
       ) : null}
 
@@ -357,7 +389,14 @@ export function LuxuryGold({ invitation, recipient }: InvitationTemplateProps) {
         <p className="mt-3 font-serif text-base italic text-[#e9e0c9]/70">
           Merupakan kehormatan tersendiri bila Bapak/Ibu/Saudara/i berkenan hadir.
         </p>
+        <p className="mt-8 text-xs">
+          <a href="#top" className="text-[#e9e0c9]/60 underline-offset-4 hover:text-[#e9e0c9] hover:underline">
+            Kembali ke atas ↑
+          </a>
+        </p>
       </footer>
+
+      <BackToTop tone="dark" />
     </article>
   )
 }
