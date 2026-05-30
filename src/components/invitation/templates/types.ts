@@ -93,6 +93,46 @@ export const DEFAULT_OPENING_QUOTES: Record<TemplateId, string> = {
     "Bunga-bunga ini kami kumpulkan satu per satu dari hari-hari yang panjang menjadi kami berdua.",
   "cinematic-story":
     "Setiap pasangan punya cerita. Ini bagian yang ingin kami bagi dengan Anda.",
+  "javanese-royal":
+    "Sinambungan tresna ingkang luhur, kawiwitan saking pangestu. Sugeng rawuh ngestreni dhauping putra-putri kami.",
+  "sundanese-nature":
+    "Sapertos cai nu ngalir tina hulu ka muara, kanyaah kami tumuwuh lirih dina sapoé-poé.",
+  "balinese-temple":
+    "Om Swastiastu. Atas asung kerta wara nugraha Ida Sang Hyang Widhi Wasa, kami menyatukan dua hati dalam satu rasa.",
+  "minang-adat":
+    "Adat basandi syarak, syarak basandi Kitabullah. Dengan iringan doa, kami menjalin dua kaum menjadi satu ikatan.",
+  "betawi-festive":
+    "Dari Betawi yang hangat dan rame, kami ngundang abang none sekalian buat ngerayain hari bahagia kami.",
+  "spring-garden":
+    "Seperti taman yang merekah pelan di awal musim, kami pun mekar bersama dalam hari yang kami nantikan.",
+  "autumn-warmth":
+    "Di antara daun yang berguguran, kami menemukan kehangatan yang tetap tinggal — dan memilih untuk merawatnya selamanya.",
+  "beach-sunset":
+    "Di tepi laut tempat langit dan ombak bertemu, kami menulis janji yang dibawa angin ke seluruh penjuru.",
+  "nordic-winter":
+    "Dalam tenangnya musim dingin, satu janji yang sederhana terasa paling jernih. Hari ini kami ucapkan.",
+  "art-deco":
+    "Dengan gemerlap yang dirancang sederhana namun anggun, kami merayakan satu malam yang akan kami kenang.",
+  "bohemian-dream":
+    "Kami memilih jalan kami sendiri, bebas dan apa adanya — dan di ujungnya, kami memilih satu sama lain.",
+  "waterfront-blue":
+    "Seperti air yang selalu menemukan jalan pulang ke laut, kami menemukan jalan pulang pada satu sama lain.",
+  "royal-purple":
+    "Dengan rasa syukur dan kehormatan, kami mengundang Anda menyaksikan dua hati dipersatukan dalam janji yang agung.",
+  "cherry-blossom":
+    "Bagai kelopak sakura yang jatuh perlahan, hari-hari membawa kami pada satu musim yang kami nantikan bersama.",
+  "desert-rose":
+    "Di tanah yang gersang pun mawar tetap mekar. Begitu pula kasih kami — tumbuh sabar, mekar pada waktunya.",
+  "vintage-lace":
+    "Dengan kelembutan masa lampau yang kami rindukan, kami merangkai hari ini menjadi kenangan yang abadi.",
+  "tropical-paradise":
+    "Di bawah langit tropis yang cerah, kami merayakan cinta yang tumbuh subur dan penuh warna.",
+  "celestial-night":
+    "Di antara jutaan bintang, kami menemukan satu sama lain — dan memilih untuk berjalan di bawah langit yang sama.",
+  "marble-luxe":
+    "Dalam kesederhanaan yang ditata dengan teliti, kami menemukan keindahan yang ingin kami jaga selamanya.",
+  "folk-art":
+    "Dari hal-hal kecil yang dibuat dengan tangan dan hati, kami merangkai kisah sederhana yang ingin kami bagi.",
 }
 
 export function getDefaultOpeningQuote(theme: string): string {
