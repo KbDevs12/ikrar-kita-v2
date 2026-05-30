@@ -27,6 +27,13 @@ const ENV = {
 beforeEach(() => {
   for (const [k, v] of Object.entries(ENV)) process.env[k] = v as string
   vi.resetModules()
+  findUniqueMock.mockReset()
+  updateMock.mockReset()
+  auditCreateMock.mockReset().mockResolvedValue({})
+  eventCreateMock.mockReset().mockResolvedValue({})
+  subFindFirstMock.mockReset()
+  subUpdateMock.mockReset()
+  subCreateMock.mockReset()
 })
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
