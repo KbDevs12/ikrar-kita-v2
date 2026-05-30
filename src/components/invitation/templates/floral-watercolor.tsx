@@ -9,7 +9,11 @@
  *   - Schedule rendered as garlanded panels with a wreath bullet
  */
 import Link from "next/link"
-import type { InvitationTemplateProps } from "./types"
+import {
+  type InvitationContent,
+  type InvitationTemplateProps,
+  readContent,
+} from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -17,19 +21,6 @@ import { PublicGuestMessageForm } from "../sections/guest-message-form"
 import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
-interface InvitationContent {
-  schedule?: Array<{ label: string; startsAt: string; endsAt?: string; notes?: string }>
-  groomFatherName?: string
-  groomMotherName?: string
-  brideFatherName?: string
-  brideMotherName?: string
-  openingQuote?: string
-  giftEnabled?: boolean
-  giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
-  rsvpEnabled?: boolean
-  guestMessageEnabled?: boolean
-  mapsUrl?: string
-}
 
 /**
  * A small "bouquet" composed of three blob blossoms and a couple of leaves.
@@ -109,7 +100,7 @@ function WreathBullet({ className }: { className?: string }) {
 }
 
 export function FloralWatercolor({ invitation, recipient }: InvitationTemplateProps) {
-  const c = (invitation.content ?? {}) as InvitationContent
+  const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#b65538"
 
   return (

@@ -12,7 +12,11 @@
  *     dark-romance's copper-on-navy and modern-minimalist's hairline editorial.
  */
 import Link from "next/link"
-import type { InvitationTemplateProps } from "./types"
+import {
+  type InvitationContent,
+  type InvitationTemplateProps,
+  readContent,
+} from "./types"
 import { Countdown } from "../sections/countdown"
 import { formatScheduleDate, formatScheduleRange } from "../sections/section-helpers"
 import { PublicRsvpForm } from "../sections/rsvp-form"
@@ -20,20 +24,6 @@ import { PublicGuestMessageForm } from "../sections/guest-message-form"
 import { GuestMessagesList } from "../sections/guest-messages-list"
 import { formatDateID } from "@/lib/utils"
 
-interface InvitationContent {
-  schedule?: Array<{ label: string; startsAt: string; endsAt?: string; notes?: string }>
-  groomFatherName?: string
-  groomMotherName?: string
-  brideFatherName?: string
-  brideMotherName?: string
-  coupleStory?: string
-  openingQuote?: string
-  giftEnabled?: boolean
-  giftAccounts?: Array<{ bankName: string; accountNumber: string; accountHolder: string }>
-  rsvpEnabled?: boolean
-  guestMessageEnabled?: boolean
-  mapsUrl?: string
-}
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"]
 
@@ -85,7 +75,7 @@ function Chapter({
 }
 
 export function CinematicStory({ invitation, recipient }: InvitationTemplateProps) {
-  const c = (invitation.content ?? {}) as InvitationContent
+  const c = readContent(invitation.content)
   const accent = invitation.primaryColor ?? "#e9d8ad"
 
   // Build the chapter sequence. Each chapter is conditional on data.
