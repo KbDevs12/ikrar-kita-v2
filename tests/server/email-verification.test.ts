@@ -116,8 +116,8 @@ beforeEach(() => {
   redisGetMock.mockReset()
   redisTtlMock.mockReset()
   redisSetMock.mockReset()
-  sendVerificationEmailMock.mockReset()
-  sendVerificationSuccessEmailMock.mockReset()
+  sendVerificationEmailMock.mockReset().mockResolvedValue(undefined)
+  sendVerificationSuccessEmailMock.mockReset().mockResolvedValue(undefined)
   transactionMock.mockClear()
 })
 
