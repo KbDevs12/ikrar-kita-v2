@@ -427,7 +427,7 @@ function CancelInvoiceForm({ invoiceId }: { invoiceId: string }) {
         {([canSubmit, isSubmitting]) => (
           <Button
             type="submit"
-            variant="destructive"
+            variant="danger"
             className="mt-4"
             disabled={!canSubmit || isSubmitting}
           >
