@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dashboard / app shell - clean, neutral, slightly warm */
+    --background: 36 33% 97%;
+    --foreground: 30 12% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 30 12% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 12% 14%;
+
+    --primary: 22 50% 38%;
+    --primary-foreground: 36 33% 97%;
+
+    --secondary: 32 22% 92%;
+    --secondary-foreground: 30 12% 14%;
+
+    --muted: 32 18% 94%;
+    --muted-foreground: 30 8% 42%;
+
+    --accent: 32 22% 92%;
+    --accent-foreground: 30 12% 14%;
+
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 36 33% 97%;
+
+    --border: 32 14% 86%;
+    --input: 32 14% 86%;
+    --ring: 22 50% 38%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 30 8% 8%;
+    --foreground: 36 18% 92%;
+
+    --card: 30 8% 11%;
+    --card-foreground: 36 18% 92%;
+
+    --popover: 30 8% 11%;
+    --popover-foreground: 36 18% 92%;
+
+    --primary: 22 60% 60%;
+    --primary-foreground: 30 8% 8%;
+
+    --secondary: 30 6% 16%;
+    --secondary-foreground: 36 18% 92%;
+
+    --muted: 30 6% 16%;
+    --muted-foreground: 32 8% 60%;
+
+    --accent: 30 6% 16%;
+    --accent-foreground: 36 18% 92%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 36 18% 92%;
+
+    --border: 30 6% 20%;
+    --input: 30 6% 20%;
+    --ring: 22 60% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Better default focus ring - visible but not aggressive */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Headings keep slightly tighter tracking for premium feel */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Subtle paper-like grain for premium sections */
+  .bg-grain {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+      radial-gradient(circle at 80% 60%, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+    background-size: 24px 24px, 32px 32px;
+  }
+}
